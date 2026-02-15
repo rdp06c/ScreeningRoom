@@ -1,12 +1,15 @@
 import { posterUrl, providerLogoUrl } from '../lib/tmdb'
+import { useAuth } from '../contexts/AuthContext'
 import StarRating from './StarRating'
 
-export default function FeedItem({ review }) {
+export default function FeedItem({ review, onEdit }) {
+  const { user } = useAuth()
   const displayRating = review.rating ? review.rating / 2 : null
   const content = review.content_items
   const isYouTube = content?.content_type === 'youtube_video'
   const genres = content?.metadata_json?.genres || []
   const streaming = content?.streaming_availability || []
+  const isOwn = user?.id === review.user_id
 
   const contentTypeLabel = isYouTube
     ? 'YouTube'
@@ -16,8 +19,16 @@ export default function FeedItem({ review }) {
     ? content?.poster_thumbnail_url
     : posterUrl(content?.poster_thumbnail_url, 'w92')
 
+  function handleClick() {
+    if (isOwn && onEdit) onEdit(review)
+  }
+
   return (
-    <div className="feed-item">
+    <div
+      className={`feed-item ${isOwn ? 'feed-item--editable' : ''}`}
+      onClick={handleClick}
+      title={isOwn ? 'Click to edit your review' : undefined}
+    >
       <div className="feed-item-user">
         {review.users?.avatar_url ? (
           <img src={review.users.avatar_url} alt="" className="feed-item-avatar" />

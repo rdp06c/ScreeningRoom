@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import FeedItem from '../components/FeedItem'
+import SearchBar from '../components/SearchBar'
+import ReviewModal from '../components/ReviewModal'
 
 const VIBE_TAGS = [
   'Feel-Good', 'Mind-Bending', 'Slow Burn', 'Binge-Worthy',
@@ -24,6 +26,9 @@ export default function Feed() {
     tag: 'all',
     minRating: 'all',
   })
+  const [selectedItem, setSelectedItem] = useState(null)
+  const [editingReview, setEditingReview] = useState(null)
+  const [showSearch, setShowSearch] = useState(false)
 
   useEffect(() => {
     fetchMembers()
@@ -126,11 +131,60 @@ export default function Feed() {
     setFilter(prev => ({ ...prev, [key]: value }))
   }
 
+  function handleEditReview(review) {
+    const content = review.content_items
+    const isYouTube = content?.content_type === 'youtube_video'
+
+    // Build an item object that ReviewModal expects
+    const item = {
+      id: content.external_id,
+      title: content.title,
+      year: content.year,
+      mediaType: isYouTube ? 'youtube' : content.content_type === 'movie' ? 'movie' : 'tv',
+      posterPath: isYouTube ? null : content.poster_thumbnail_url,
+      thumbnailUrl: isYouTube ? content.poster_thumbnail_url : null,
+      channelName: content.metadata_json?.channelName,
+      duration: content.metadata_json?.duration,
+      description: content.metadata_json?.description,
+      publishedAt: content.metadata_json?.publishedAt,
+    }
+
+    setSelectedItem(item)
+    setEditingReview(review)
+  }
+
+  function handleModalClose() {
+    setSelectedItem(null)
+    setEditingReview(null)
+  }
+
+  function handleSaved() {
+    setSelectedItem(null)
+    setEditingReview(null)
+    setShowSearch(false)
+    fetchReviews()
+  }
+
   return (
     <div className="feed-page">
       <div className="feed-header">
         <h1>Group Feed</h1>
+        <button
+          className="btn btn-primary feed-add-btn"
+          onClick={() => setShowSearch(!showSearch)}
+        >
+          {showSearch ? 'Cancel' : '+ Log Something'}
+        </button>
       </div>
+
+      {showSearch && (
+        <div className="feed-search">
+          <SearchBar onSelect={item => {
+            setSelectedItem(item)
+            setEditingReview(null)
+          }} />
+        </div>
+      )}
 
       <div className="feed-filters">
         <select
@@ -196,9 +250,18 @@ export default function Feed() {
 
       <div className="feed-list">
         {reviews.map(review => (
-          <FeedItem key={review.id} review={review} />
+          <FeedItem key={review.id} review={review} onEdit={handleEditReview} />
         ))}
       </div>
+
+      {selectedItem && (
+        <ReviewModal
+          item={selectedItem}
+          existingReview={editingReview}
+          onClose={handleModalClose}
+          onSaved={handleSaved}
+        />
+      )}
     </div>
   )
 }

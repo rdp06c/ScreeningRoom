@@ -12,20 +12,50 @@ const VIBE_TAGS = [
   'Short Film', 'Nature', 'Animated',
 ]
 
-export default function ReviewModal({ item, onClose, onSaved }) {
+export default function ReviewModal({ item, onClose, onSaved, existingReview }) {
   const { user } = useAuth()
-  const [rating, setRating] = useState(null)
-  const [shortTake, setShortTake] = useState('')
-  const [selectedTags, setSelectedTags] = useState([])
+  const [rating, setRating] = useState(
+    existingReview?.rating ? existingReview.rating / 2 : null
+  )
+  const [shortTake, setShortTake] = useState(existingReview?.short_take || '')
+  const [selectedTags, setSelectedTags] = useState(
+    existingReview?.tags?.map(t => t.tag) || []
+  )
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState(null)
 
   const isYouTube = item.mediaType === 'youtube'
+  const isEditing = !!existingReview
 
   function toggleTag(tag) {
     setSelectedTags(prev =>
       prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
     )
+  }
+
+  async function handleDelete() {
+    if (!confirm('Delete this review? This cannot be undone.')) return
+
+    setDeleting(true)
+    setError(null)
+
+    try {
+      await supabase.from('tags').delete().eq('review_id', existingReview.id)
+      const { error: deleteError } = await supabase
+        .from('reviews')
+        .delete()
+        .eq('id', existingReview.id)
+
+      if (deleteError) throw deleteError
+
+      onSaved?.()
+      onClose()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setDeleting(false)
+    }
   }
 
   async function handleSubmit(e) {
@@ -206,9 +236,21 @@ export default function ReviewModal({ item, onClose, onSaved }) {
 
           {error && <p className="form-error">{error}</p>}
 
-          <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? 'Saving...' : 'Mark as Watched'}
-          </button>
+          <div className="modal-actions">
+            <button type="submit" className="btn btn-primary" disabled={saving || deleting}>
+              {saving ? 'Saving...' : isEditing ? 'Update Review' : 'Mark as Watched'}
+            </button>
+            {isEditing && (
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={handleDelete}
+                disabled={saving || deleting}
+              >
+                {deleting ? 'Deleting...' : 'Delete Review'}
+              </button>
+            )}
+          </div>
         </form>
       </div>
     </div>
