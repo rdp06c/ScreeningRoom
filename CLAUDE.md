@@ -238,21 +238,25 @@ A group of 10–30 people logging a few reviews per week will stay well within e
 
 ## Development Phases
 
-### Phase 1: Foundation (1–2 weeks)
+### Phase 1: Foundation — COMPLETE
 - Supabase project: tables, RLS policies, auth configuration
 - TMDB search integration (movie + TV)
 - Core flow: search → log as watched → rate → short take
 - Single hardcoded group, invite by link
 - Basic feed (reverse chronological, all reviews)
 
-### Phase 2: Full Content Support (1–2 weeks)
+### Phase 2: Full Content Support — COMPLETE
 - YouTube URL paste → metadata extraction → log/rate flow
 - Auto-genre population from TMDB
 - Vibe tag system (curated dropdown, multi-select)
 - Streaming availability badges on movie/TV cards
 - Feed filtering (person, content type, genre, tag, rating)
+- Edit/delete own reviews (click review in feed)
+- "+ Log Something" button on feed page
+- Auto-navigate to feed after submitting a review
+- Added vibe tags: Short Film, Nature, Animated
 
-### Phase 3: Social Layer (1 week)
+### Phase 3: Social Layer — UP NEXT
 - User profile pages (rating history, stats, filters)
 - Group average ratings on content cards
 - "Watched but not rated" distinct from "not watched"
