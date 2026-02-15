@@ -548,6 +548,13 @@ a:hover {
   font-size: 1.5rem;
 }
 
+.feed-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
 .feed-filters select {
   padding: 0.5rem 0.75rem;
   background: var(--color-surface);
@@ -555,6 +562,9 @@ a:hover {
   border-radius: var(--radius);
   color: var(--color-text);
   font-size: 0.85rem;
+  min-width: 0;
+  flex: 1 1 140px;
+  max-width: 200px;
 }
 
 .feed-loading,
@@ -663,6 +673,104 @@ a:hover {
   margin-top: 0.5rem;
 }
 
+.feed-item-genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.feed-item-thumbnail {
+  width: 120px;
+  height: 68px;
+  object-fit: cover;
+  border-radius: 4px;
+  background: var(--color-border);
+}
+
+/* ============================================================
+   Genre Chips
+   ============================================================ */
+
+.genre-chip {
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: var(--color-surface-hover);
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* ============================================================
+   Streaming Badges
+   ============================================================ */
+
+.streaming-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  align-items: center;
+}
+
+.streaming-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+/* ============================================================
+   Search YouTube Button
+   ============================================================ */
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.search-input-wrapper .search-input {
+  flex: 1;
+}
+
+.search-yt-btn {
+  padding: 0.5rem 1rem;
+  background: #ff0000;
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.search-yt-btn:hover:not(:disabled) {
+  background: #cc0000;
+}
+.search-yt-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   Modal — YouTube
+   ============================================================ */
+
+.modal-thumbnail {
+  width: 160px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: var(--radius);
+}
+
+.modal-channel {
+  font-size: 0.85rem;
+  color: var(--color-accent);
+  margin-top: 0.25rem;
+}
+
 /* ============================================================
    Content Card
    ============================================================ */
@@ -734,5 +842,17 @@ a:hover {
   }
   .auth-card {
     padding: 1.5rem;
+  }
+  .feed-filters select {
+    flex: 1 1 100%;
+    max-width: none;
+  }
+  .feed-item-thumbnail {
+    width: 80px;
+    height: 45px;
+  }
+  .modal-thumbnail {
+    width: 120px;
+    height: 68px;
   }
 }

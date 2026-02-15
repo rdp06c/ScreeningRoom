@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { searchMulti } from '../lib/tmdb'
+import { isYouTubeUrl, extractVideoId, getVideoDetails } from '../lib/youtube'
 import SearchResults from './SearchResults'
 
 export default function SearchBar({ onSelect }) {
@@ -14,6 +15,13 @@ export default function SearchBar({ onSelect }) {
     if (debounceRef.current) clearTimeout(debounceRef.current)
 
     if (!query.trim()) {
+      setResults([])
+      setOpen(false)
+      return
+    }
+
+    // If it's a YouTube URL, don't debounce search — handle on submit/enter
+    if (isYouTubeUrl(query.trim())) {
       setResults([])
       setOpen(false)
       return
@@ -45,6 +53,40 @@ export default function SearchBar({ onSelect }) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  async function handleYouTubeSubmit() {
+    const videoId = extractVideoId(query.trim())
+    if (!videoId) return
+
+    setLoading(true)
+    try {
+      const details = await getVideoDetails(videoId)
+      setQuery('')
+      onSelect({
+        id: videoId,
+        mediaType: 'youtube',
+        title: details.title,
+        posterPath: null,
+        thumbnailUrl: details.thumbnailUrl,
+        year: details.year,
+        channelName: details.channelName,
+        duration: details.duration,
+        description: details.description,
+        publishedAt: details.publishedAt,
+      })
+    } catch (err) {
+      console.error('YouTube fetch failed:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === 'Enter' && isYouTubeUrl(query.trim())) {
+      e.preventDefault()
+      handleYouTubeSubmit()
+    }
+  }
+
   function handleSelect(item) {
     setOpen(false)
     setQuery('')
@@ -53,15 +95,28 @@ export default function SearchBar({ onSelect }) {
 
   return (
     <div className="search-bar" ref={containerRef}>
-      <input
-        type="text"
-        placeholder="Search movies & TV shows..."
-        value={query}
-        onChange={e => setQuery(e.target.value)}
-        onFocus={() => results.length > 0 && setOpen(true)}
-        className="search-input"
-      />
-      {loading && <span className="search-spinner">Searching...</span>}
+      <div className="search-input-wrapper">
+        <input
+          type="text"
+          placeholder="Search movies & TV shows or paste a YouTube URL..."
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onFocus={() => results.length > 0 && setOpen(true)}
+          className="search-input"
+        />
+        {isYouTubeUrl(query.trim()) && (
+          <button
+            className="search-yt-btn"
+            onClick={handleYouTubeSubmit}
+            disabled={loading}
+            type="button"
+          >
+            {loading ? 'Loading...' : 'Fetch'}
+          </button>
+        )}
+      </div>
+      {loading && !isYouTubeUrl(query.trim()) && <span className="search-spinner">Searching...</span>}
       {open && results.length > 0 && (
         <SearchResults results={results} onSelect={handleSelect} />
       )}

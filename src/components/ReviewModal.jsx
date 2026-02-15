@@ -9,6 +9,7 @@ const VIBE_TAGS = [
   'Watch With Kids', 'Date Night', 'Background Noise', 'Visually Stunning',
   'Hidden Gem', 'Overhyped', 'Emotional', 'Educational',
   'Sports', 'True Crime', 'Comfort Rewatch',
+  'Short Film', 'Nature', 'Animated',
 ]
 
 export default function ReviewModal({ item, onClose, onSaved }) {
@@ -19,6 +20,8 @@ export default function ReviewModal({ item, onClose, onSaved }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
 
+  const isYouTube = item.mediaType === 'youtube'
+
   function toggleTag(tag) {
     setSelectedTags(prev =>
       prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
@@ -27,17 +30,33 @@ export default function ReviewModal({ item, onClose, onSaved }) {
 
   async function handleSubmit(e) {
     e.preventDefault()
+
+    if (isYouTube && selectedTags.length === 0) {
+      setError('YouTube videos require at least one vibe tag.')
+      return
+    }
+
     setSaving(true)
     setError(null)
 
     try {
-      // Fetch full details for metadata and streaming providers
-      const contentType = item.mediaType === 'movie' ? 'movie' : 'tv_show'
-      let details
-      if (item.mediaType === 'movie') {
-        details = await getMovieDetails(item.id)
+      let contentType, metadata, providers = []
+
+      if (isYouTube) {
+        contentType = 'youtube_video'
+        metadata = {
+          channelName: item.channelName,
+          duration: item.duration,
+          description: item.description?.slice(0, 500),
+          publishedAt: item.publishedAt,
+        }
       } else {
-        details = await getTvDetails(item.id)
+        contentType = item.mediaType === 'movie' ? 'movie' : 'tv_show'
+        const details = item.mediaType === 'movie'
+          ? await getMovieDetails(item.id)
+          : await getTvDetails(item.id)
+        metadata = details.metadata
+        providers = details.providers || []
       }
 
       // Upsert content item (dedup by external_id + content_type)
@@ -47,9 +66,9 @@ export default function ReviewModal({ item, onClose, onSaved }) {
           content_type: contentType,
           external_id: String(item.id),
           title: item.title,
-          poster_thumbnail_url: item.posterPath,
+          poster_thumbnail_url: isYouTube ? item.thumbnailUrl : item.posterPath,
           year: item.year,
-          metadata_json: details.metadata,
+          metadata_json: metadata,
         }, { onConflict: 'external_id,content_type' })
         .select()
         .single()
@@ -73,7 +92,7 @@ export default function ReviewModal({ item, onClose, onSaved }) {
           user_id: user.id,
           content_item_id: contentItem.id,
           group_id: membership.group_id,
-          rating: rating ? Math.round(rating * 2) : null, // Convert 0.5-5.0 to 1-10
+          rating: rating ? Math.round(rating * 2) : null,
           short_take: shortTake.trim() || null,
           watched_date: new Date().toISOString().split('T')[0],
         }, { onConflict: 'user_id,content_item_id,group_id' })
@@ -91,15 +110,15 @@ export default function ReviewModal({ item, onClose, onSaved }) {
         if (tagError) throw tagError
       }
 
-      // Cache streaming availability
-      if (details.providers?.length > 0) {
+      // Cache streaming availability (movies/TV only)
+      if (!isYouTube && providers.length > 0) {
         await supabase
           .from('streaming_availability')
           .delete()
           .eq('content_item_id', contentItem.id)
         await supabase
           .from('streaming_availability')
-          .insert(details.providers.map(p => ({
+          .insert(providers.map(p => ({
             content_item_id: contentItem.id,
             platform_name: p.name,
             platform_logo_url: p.logoPath,
@@ -116,25 +135,37 @@ export default function ReviewModal({ item, onClose, onSaved }) {
     }
   }
 
+  const thumbnailSrc = isYouTube
+    ? item.thumbnailUrl
+    : posterUrl(item.posterPath, 'w154')
+
+  const contentLabel = isYouTube
+    ? 'YouTube'
+    : item.mediaType === 'movie' ? 'Movie' : 'TV Show'
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <button className="modal-close" onClick={onClose}>&times;</button>
 
         <div className="modal-header">
-          {item.posterPath && (
+          {thumbnailSrc && (
             <img
-              src={posterUrl(item.posterPath, 'w154')}
+              src={thumbnailSrc}
               alt={item.title}
-              className="modal-poster"
+              className={isYouTube ? 'modal-thumbnail' : 'modal-poster'}
             />
           )}
           <div>
             <h2>{item.title}</h2>
             <p className="modal-meta">
-              {item.mediaType === 'movie' ? 'Movie' : 'TV Show'}
+              {contentLabel}
               {item.year ? ` · ${item.year}` : ''}
+              {isYouTube && item.duration ? ` · ${item.duration}` : ''}
             </p>
+            {isYouTube && item.channelName && (
+              <p className="modal-channel">{item.channelName}</p>
+            )}
           </div>
         </div>
 
@@ -156,7 +187,9 @@ export default function ReviewModal({ item, onClose, onSaved }) {
           </div>
 
           <div className="form-group">
-            <label>Vibe Tags (optional)</label>
+            <label>
+              Vibe Tags {isYouTube ? '(at least one required)' : '(optional)'}
+            </label>
             <div className="tag-grid">
               {VIBE_TAGS.map(tag => (
                 <button
