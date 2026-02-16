@@ -2,7 +2,7 @@ import { posterUrl, providerLogoUrl } from '../lib/tmdb'
 import { useAuth } from '../contexts/AuthContext'
 import StarRating from './StarRating'
 
-export default function FeedItem({ review, onEdit }) {
+export default function FeedItem({ review, onEdit, groupAvg }) {
   const { user } = useAuth()
   const displayRating = review.rating ? review.rating / 2 : null
   const content = review.content_items
@@ -25,16 +25,17 @@ export default function FeedItem({ review, onEdit }) {
 
   return (
     <div
+      id={`review-${review.id}`}
       className={`feed-item ${isOwn ? 'feed-item--editable' : ''}`}
       onClick={handleClick}
       title={isOwn ? 'Click to edit your review' : undefined}
     >
       <div className="feed-item-user">
-        {review.users?.avatar_url ? (
+        {review.users?.avatar_url && review.users.avatar_url.startsWith('http') ? (
           <img src={review.users.avatar_url} alt="" className="feed-item-avatar" />
         ) : (
-          <div className="feed-item-avatar feed-item-avatar--placeholder">
-            {(review.users?.display_name || '?')[0].toUpperCase()}
+          <div className={`feed-item-avatar feed-item-avatar--placeholder ${review.users?.avatar_url ? 'feed-item-avatar--emoji' : ''}`}>
+            {review.users?.avatar_url || (review.users?.display_name || '?')[0].toUpperCase()}
           </div>
         )}
         <span className="feed-item-username">{review.users?.display_name || 'Unknown'}</span>
@@ -65,6 +66,13 @@ export default function FeedItem({ review, onEdit }) {
           )}
           {!displayRating && review.rating === null && (
             <span className="feed-item-watched-badge">Watched</span>
+          )}
+          {groupAvg && (
+            <div className="feed-item-group-avg">
+              <span className="feed-item-group-avg-star">{'\u2605'}</span>
+              <span className="feed-item-group-avg-value">{groupAvg.avg.toFixed(1)}</span>
+              <span className="feed-item-group-avg-count">group avg ({groupAvg.count})</span>
+            </div>
           )}
           {review.short_take && (
             <p className="feed-item-take">{review.short_take}</p>

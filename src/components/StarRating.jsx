@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
 
 export default function StarRating({ value, onChange, readonly = false }) {
   const [hoverValue, setHoverValue] = useState(0)
+  const containerRef = useRef(null)
   const displayValue = hoverValue || value || 0
 
   function handleClick(starIndex, isHalf) {
@@ -18,10 +19,49 @@ export default function StarRating({ value, onChange, readonly = false }) {
     setHoverValue(isHalf ? starIndex - 0.5 : starIndex)
   }
 
+  const getStarFromTouch = useCallback((touch) => {
+    if (!containerRef.current) return null
+    const stars = containerRef.current.querySelectorAll('.star')
+    for (let i = 0; i < stars.length; i++) {
+      const rect = stars[i].getBoundingClientRect()
+      if (touch.clientX >= rect.left && touch.clientX <= rect.right) {
+        const isHalf = (touch.clientX - rect.left) < rect.width / 2
+        return isHalf ? (i + 1) - 0.5 : (i + 1)
+      }
+    }
+    return null
+  }, [])
+
+  function handleTouchStart(e) {
+    if (readonly) return
+    e.preventDefault()
+    const val = getStarFromTouch(e.touches[0])
+    if (val !== null) setHoverValue(val)
+  }
+
+  function handleTouchMove(e) {
+    if (readonly) return
+    e.preventDefault()
+    const val = getStarFromTouch(e.touches[0])
+    if (val !== null) setHoverValue(val)
+  }
+
+  function handleTouchEnd() {
+    if (readonly) return
+    if (hoverValue) {
+      onChange(hoverValue === value ? null : hoverValue)
+    }
+    setHoverValue(0)
+  }
+
   return (
     <div
+      ref={containerRef}
       className={`star-rating ${readonly ? 'star-rating--readonly' : ''}`}
       onMouseLeave={() => setHoverValue(0)}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       {[1, 2, 3, 4, 5].map(star => {
         const filled = displayValue >= star

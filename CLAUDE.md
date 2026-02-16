@@ -256,11 +256,29 @@ A group of 10–30 people logging a few reviews per week will stay well within e
 - Auto-navigate to feed after submitting a review
 - Added vibe tags: Short Film, Nature, Animated
 
+### Phase 2.5: Visual Redesign — COMPLETE
+- Warm, mobile-first design system with Inter font
+- Color palette: Rich Amber primary (#d97706), Sage Green accent (#6b8f71)
+- Light mode with stronger contrast (warm off-white #f5f1ec bg, darker borders/muted text)
+- Dark mode toggle (persisted in localStorage, accessible from profile menu)
+- Bottom tab bar navigation: Home | Log (+, centered) | Feed
+- Log button opens full-screen search overlay from any page
+- Profile dropdown menu in header (edit profile, theme toggle, sign out)
+- Emoji avatar picker (40 options) + display name editor in ProfileModal
+- Feed filter bottom sheet (slides up on tap) replacing inline filter expansion
+- Group average ratings on feed cards (shown when 2+ people rated same content)
+- Feed cards with rotating left-border accent colors (amber, sage, dusty blue)
+- Recent activity on Home page links directly to specific review (scroll + highlight)
+- Feed auto-refreshes when a new review is submitted from the Log overlay
+- Bottom sheet modal pattern for ReviewModal on mobile
+- Touch-optimized star rating (40px stars with 6px padding = 52px touch targets)
+- Home page: greeting, search, stats row, 5 recent activity cards, subtle gradient bg
+- Header/bottom nav with subtle shadows for depth
+
 ### Phase 3: Social Layer — UP NEXT
 - User profile pages (rating history, stats, filters)
-- Group average ratings on content cards
 - "Watched but not rated" distinct from "not watched"
-- Mobile-responsive polish, PWA setup (installable)
+- PWA setup (installable, service worker, manifest)
 
 ### Phase 4: Refinement & v2 Features (Ongoing)
 - Want to Watch list

@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
+import { useSearchParams, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import FeedItem from '../components/FeedItem'
-import SearchBar from '../components/SearchBar'
 import ReviewModal from '../components/ReviewModal'
 
 const VIBE_TAGS = [
@@ -13,12 +13,31 @@ const VIBE_TAGS = [
   'Short Film', 'Nature', 'Animated',
 ]
 
+const CONTENT_TYPES = [
+  { value: 'all', label: 'All' },
+  { value: 'movie', label: 'Movies' },
+  { value: 'tv_show', label: 'TV' },
+  { value: 'youtube_video', label: 'YouTube' },
+]
+
+const RATING_OPTIONS = [
+  { value: 'all', label: 'Any Rating' },
+  { value: '1', label: '1+' },
+  { value: '2', label: '2+' },
+  { value: '3', label: '3+' },
+  { value: '4', label: '4+' },
+  { value: '5', label: '5' },
+]
+
 export default function Feed() {
   const { user } = useAuth()
+  const location = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [reviews, setReviews] = useState([])
   const [loading, setLoading] = useState(true)
   const [members, setMembers] = useState([])
   const [allGenres, setAllGenres] = useState([])
+  const highlightReviewId = searchParams.get('review')
   const [filter, setFilter] = useState({
     contentType: 'all',
     userId: 'all',
@@ -28,7 +47,8 @@ export default function Feed() {
   })
   const [selectedItem, setSelectedItem] = useState(null)
   const [editingReview, setEditingReview] = useState(null)
-  const [showSearch, setShowSearch] = useState(false)
+  const [expandedFilter, setExpandedFilter] = useState(null)
+  const [groupAverages, setGroupAverages] = useState({})
 
   useEffect(() => {
     fetchMembers()
@@ -37,6 +57,27 @@ export default function Feed() {
   useEffect(() => {
     fetchReviews()
   }, [filter])
+
+  // Re-fetch when navigated here with a refresh signal (e.g. after saving a review)
+  useEffect(() => {
+    if (location.state?.refresh) {
+      fetchReviews()
+    }
+  }, [location.state?.refresh])
+
+  // Scroll to highlighted review from query param
+  useEffect(() => {
+    if (!loading && highlightReviewId) {
+      const el = document.getElementById(`review-${highlightReviewId}`)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        el.classList.add('feed-item--highlight')
+        setTimeout(() => el.classList.remove('feed-item--highlight'), 2000)
+        // Clear the param so it doesn't re-highlight on filter change
+        setSearchParams({}, { replace: true })
+      }
+    }
+  }, [loading, highlightReviewId])
 
   async function fetchMembers() {
     const { data: membership } = await supabase
@@ -122,6 +163,24 @@ export default function Feed() {
       })
       setAllGenres([...genreSet].sort())
 
+      // Compute group averages per content item (from all reviews, not filtered)
+      const avgMap = {}
+      data.forEach(r => {
+        if (!r.content_item_id || r.rating == null) return
+        if (!avgMap[r.content_item_id]) {
+          avgMap[r.content_item_id] = { sum: 0, count: 0 }
+        }
+        avgMap[r.content_item_id].sum += r.rating
+        avgMap[r.content_item_id].count += 1
+      })
+      const averages = {}
+      for (const [id, { sum, count }] of Object.entries(avgMap)) {
+        if (count >= 2) {
+          averages[id] = { avg: sum / count / 2, count }
+        }
+      }
+      setGroupAverages(averages)
+
       setReviews(filtered)
     }
     setLoading(false)
@@ -129,13 +188,40 @@ export default function Feed() {
 
   function updateFilter(key, value) {
     setFilter(prev => ({ ...prev, [key]: value }))
+    setExpandedFilter(null)
+  }
+
+  function toggleFilterCategory(category) {
+    setExpandedFilter(prev => prev === category ? null : category)
+  }
+
+  function getFilterLabel(key) {
+    switch (key) {
+      case 'contentType':
+        return CONTENT_TYPES.find(c => c.value === filter.contentType)?.label || 'Type'
+      case 'userId': {
+        if (filter.userId === 'all') return 'Person'
+        return members.find(m => m.id === filter.userId)?.name || 'Person'
+      }
+      case 'genre':
+        return filter.genre === 'all' ? 'Genre' : filter.genre
+      case 'tag':
+        return filter.tag === 'all' ? 'Tag' : filter.tag
+      case 'minRating':
+        return filter.minRating === 'all' ? 'Rating' : `${filter.minRating}+`
+      default:
+        return ''
+    }
+  }
+
+  function isFilterActive(key) {
+    return filter[key] !== 'all'
   }
 
   function handleEditReview(review) {
     const content = review.content_items
     const isYouTube = content?.content_type === 'youtube_video'
 
-    // Build an item object that ReviewModal expects
     const item = {
       id: content.external_id,
       title: content.title,
@@ -161,84 +247,91 @@ export default function Feed() {
   function handleSaved() {
     setSelectedItem(null)
     setEditingReview(null)
-    setShowSearch(false)
     fetchReviews()
+  }
+
+  function getFilterSheetTitle(key) {
+    switch (key) {
+      case 'contentType': return 'Content Type'
+      case 'userId': return 'Person'
+      case 'genre': return 'Genre'
+      case 'tag': return 'Vibe Tag'
+      case 'minRating': return 'Minimum Rating'
+      default: return ''
+    }
+  }
+
+  function getFilterOptions(key) {
+    switch (key) {
+      case 'contentType':
+        return CONTENT_TYPES.map(ct => ({ value: ct.value, label: ct.label }))
+      case 'userId':
+        return [
+          { value: 'all', label: 'All' },
+          ...members.map(m => ({ value: m.id, label: m.name })),
+        ]
+      case 'genre':
+        return [
+          { value: 'all', label: 'All' },
+          ...allGenres.map(g => ({ value: g, label: g })),
+        ]
+      case 'tag':
+        return [
+          { value: 'all', label: 'All' },
+          ...VIBE_TAGS.map(t => ({ value: t, label: t })),
+        ]
+      case 'minRating':
+        return RATING_OPTIONS.map(r => ({ value: r.value, label: r.label }))
+      default:
+        return []
+    }
+  }
+
+  function getFilterValue(key) {
+    return filter[key]
   }
 
   return (
     <div className="feed-page">
-      <div className="feed-header">
-        <h1>Group Feed</h1>
-        <button
-          className="btn btn-primary feed-add-btn"
-          onClick={() => setShowSearch(!showSearch)}
-        >
-          {showSearch ? 'Cancel' : '+ Log Something'}
-        </button>
+      {/* Sticky filter chip bar */}
+      <div className="feed-filters-sticky">
+      <div className="feed-filters">
+        {['contentType', 'userId', 'genre', 'tag', 'minRating'].map(key => (
+          <button
+            key={key}
+            className={`filter-chip ${isFilterActive(key) ? 'filter-chip--active' : ''}`}
+            onClick={() => isFilterActive(key) ? updateFilter(key, 'all') : toggleFilterCategory(key)}
+          >
+            {getFilterLabel(key)}
+            {isFilterActive(key) && ' \u00d7'}
+          </button>
+        ))}
+      </div>
       </div>
 
-      {showSearch && (
-        <div className="feed-search">
-          <SearchBar onSelect={item => {
-            setSelectedItem(item)
-            setEditingReview(null)
-          }} />
+      {/* Filter bottom sheet */}
+      {expandedFilter && (
+        <div className="filter-sheet-overlay" onClick={() => setExpandedFilter(null)}>
+          <div className="filter-sheet" onClick={e => e.stopPropagation()}>
+            <div className="filter-sheet-handle" />
+            <h3 className="filter-sheet-title">{getFilterSheetTitle(expandedFilter)}</h3>
+            <div className="filter-sheet-options">
+              {getFilterOptions(expandedFilter).map(opt => (
+                <button
+                  key={opt.value}
+                  className={`filter-sheet-option ${getFilterValue(expandedFilter) === opt.value ? 'filter-sheet-option--active' : ''}`}
+                  onClick={() => updateFilter(expandedFilter, opt.value)}
+                >
+                  {opt.label}
+                  {getFilterValue(expandedFilter) === opt.value && (
+                    <span className="filter-sheet-check">{'\u2713'}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
-
-      <div className="feed-filters">
-        <select
-          value={filter.contentType}
-          onChange={e => updateFilter('contentType', e.target.value)}
-        >
-          <option value="all">All Content</option>
-          <option value="movie">Movies</option>
-          <option value="tv_show">TV Shows</option>
-          <option value="youtube_video">YouTube</option>
-        </select>
-
-        <select
-          value={filter.userId}
-          onChange={e => updateFilter('userId', e.target.value)}
-        >
-          <option value="all">All People</option>
-          {members.map(m => (
-            <option key={m.id} value={m.id}>{m.name}</option>
-          ))}
-        </select>
-
-        <select
-          value={filter.genre}
-          onChange={e => updateFilter('genre', e.target.value)}
-        >
-          <option value="all">All Genres</option>
-          {allGenres.map(g => (
-            <option key={g} value={g}>{g}</option>
-          ))}
-        </select>
-
-        <select
-          value={filter.tag}
-          onChange={e => updateFilter('tag', e.target.value)}
-        >
-          <option value="all">All Tags</option>
-          {VIBE_TAGS.map(t => (
-            <option key={t} value={t}>{t}</option>
-          ))}
-        </select>
-
-        <select
-          value={filter.minRating}
-          onChange={e => updateFilter('minRating', e.target.value)}
-        >
-          <option value="all">Any Rating</option>
-          <option value="1">1+ Stars</option>
-          <option value="2">2+ Stars</option>
-          <option value="3">3+ Stars</option>
-          <option value="4">4+ Stars</option>
-          <option value="5">5 Stars</option>
-        </select>
-      </div>
 
       {loading && <p className="feed-loading">Loading feed...</p>}
 
@@ -250,8 +343,17 @@ export default function Feed() {
 
       <div className="feed-list">
         {reviews.map(review => (
-          <FeedItem key={review.id} review={review} onEdit={handleEditReview} />
+          <FeedItem key={review.id} review={review} onEdit={handleEditReview} groupAvg={groupAverages[review.content_item_id]} />
         ))}
+      </div>
+
+      <div className="tmdb-attribution">
+        <img
+          src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg"
+          alt="TMDB"
+          className="tmdb-logo"
+        />
+        <span>This product uses the TMDB API but is not endorsed or certified by TMDB.</span>
       </div>
 
       {selectedItem && (

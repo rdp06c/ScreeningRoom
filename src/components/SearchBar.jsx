@@ -98,7 +98,7 @@ export default function SearchBar({ onSelect }) {
       <div className="search-input-wrapper">
         <input
           type="text"
-          placeholder="Search movies & TV shows or paste a YouTube URL..."
+          placeholder="Search Movie/Show or Paste YouTube URL"
           value={query}
           onChange={e => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}

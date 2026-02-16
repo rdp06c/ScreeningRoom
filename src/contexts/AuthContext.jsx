@@ -59,13 +59,17 @@ export function AuthProvider({ children }) {
     if (error) throw error
   }
 
+  async function refreshProfile() {
+    if (user) await fetchProfile(user.id)
+  }
+
   async function signOut() {
     const { error } = await supabase.auth.signOut()
     if (error) throw error
   }
 
   return (
-    <AuthContext.Provider value={{ session, user, profile, loading, signIn, signUp, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ session, user, profile, loading, signIn, signUp, signInWithGoogle, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )
