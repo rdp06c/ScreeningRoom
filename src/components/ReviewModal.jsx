@@ -23,6 +23,7 @@ export default function ReviewModal({ item, onClose, onSaved, existingReview }) 
   )
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [error, setError] = useState(null)
 
   const isYouTube = item.mediaType === 'youtube'
@@ -35,7 +36,10 @@ export default function ReviewModal({ item, onClose, onSaved, existingReview }) 
   }
 
   async function handleDelete() {
-    if (!confirm('Delete this review? This cannot be undone.')) return
+    if (!confirmDelete) {
+      setConfirmDelete(true)
+      return
+    }
 
     setDeleting(true)
     setError(null)
@@ -220,7 +224,7 @@ export default function ReviewModal({ item, onClose, onSaved, existingReview }) 
             <label>
               Vibe Tags {isYouTube ? '(at least one required)' : '(optional)'}
             </label>
-            <div className="tag-grid">
+            <div className={`tag-grid tag-grid--${item.mediaType}`}>
               {VIBE_TAGS.map(tag => (
                 <button
                   key={tag}
@@ -240,15 +244,35 @@ export default function ReviewModal({ item, onClose, onSaved, existingReview }) 
             <button type="submit" className="btn btn-primary" disabled={saving || deleting}>
               {saving ? 'Saving...' : isEditing ? 'Update Review' : 'Mark as Watched'}
             </button>
-            {isEditing && (
+            {isEditing && !confirmDelete && (
               <button
                 type="button"
                 className="btn btn-danger"
                 onClick={handleDelete}
                 disabled={saving || deleting}
               >
-                {deleting ? 'Deleting...' : 'Delete Review'}
+                Delete Review
               </button>
+            )}
+            {isEditing && confirmDelete && (
+              <div className="confirm-delete-row">
+                <span className="confirm-delete-text">Are you sure?</span>
+                <button
+                  type="button"
+                  className="btn btn-danger confirm-delete-btn"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                >
+                  {deleting ? 'Deleting...' : 'Yes, Delete'}
+                </button>
+                <button
+                  type="button"
+                  className="btn confirm-cancel-btn"
+                  onClick={() => setConfirmDelete(false)}
+                >
+                  Cancel
+                </button>
+              </div>
             )}
           </div>
         </form>

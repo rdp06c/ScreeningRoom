@@ -49,6 +49,7 @@ export default function Feed() {
   const [editingReview, setEditingReview] = useState(null)
   const [expandedFilter, setExpandedFilter] = useState(null)
   const [groupAverages, setGroupAverages] = useState({})
+  const [sortOrder, setSortOrder] = useState('newest')
 
   useEffect(() => {
     fetchMembers()
@@ -56,12 +57,13 @@ export default function Feed() {
 
   useEffect(() => {
     fetchReviews()
-  }, [filter])
+  }, [filter, sortOrder])
 
   // Re-fetch when navigated here with a refresh signal (e.g. after saving a review)
   useEffect(() => {
     if (location.state?.refresh) {
       fetchReviews()
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }, [location.state?.refresh])
 
@@ -103,7 +105,8 @@ export default function Feed() {
   }
 
   async function fetchReviews() {
-    setLoading(true)
+    // Only show loading spinner on initial load, not filter changes
+    if (reviews.length === 0) setLoading(true)
 
     let query = supabase
       .from('reviews')
@@ -113,7 +116,7 @@ export default function Feed() {
         content_items ( *, streaming_availability ( id, platform_name, platform_logo_url ) ),
         tags ( id, tag )
       `)
-      .order('created_at', { ascending: false })
+      .order('created_at', { ascending: sortOrder === 'oldest' })
       .limit(50)
 
     if (filter.contentType !== 'all') {
@@ -296,11 +299,17 @@ export default function Feed() {
       {/* Sticky filter chip bar */}
       <div className="feed-filters-sticky">
       <div className="feed-filters">
+        <button
+          className={`filter-chip filter-chip--sort`}
+          onClick={(e) => { e.currentTarget.blur(); setSortOrder(prev => prev === 'newest' ? 'oldest' : 'newest') }}
+        >
+          {sortOrder === 'newest' ? '\u2193 Newest' : '\u2191 Oldest'}
+        </button>
         {['contentType', 'userId', 'genre', 'tag', 'minRating'].map(key => (
           <button
             key={key}
             className={`filter-chip ${isFilterActive(key) ? 'filter-chip--active' : ''}`}
-            onClick={() => isFilterActive(key) ? updateFilter(key, 'all') : toggleFilterCategory(key)}
+            onClick={(e) => { e.currentTarget.blur(); isFilterActive(key) ? updateFilter(key, 'all') : toggleFilterCategory(key) }}
           >
             {getFilterLabel(key)}
             {isFilterActive(key) && ' \u00d7'}
@@ -341,7 +350,7 @@ export default function Feed() {
         </div>
       )}
 
-      <div className="feed-list">
+      <div className="feed-list" key={JSON.stringify(filter)}>
         {reviews.map(review => (
           <FeedItem key={review.id} review={review} onEdit={handleEditReview} groupAvg={groupAverages[review.content_item_id]} />
         ))}

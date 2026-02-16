@@ -78,7 +78,7 @@ export default function Layout({ children }) {
   return (
     <div className="app-layout">
       <header className="app-header">
-        <Link to="/" className="app-logo">Screening Room</Link>
+        <Link to="/" className="app-logo">Screening <span className="logo-accent">Room</span></Link>
         {user && (
           <div className="header-profile-wrap" ref={profileMenuRef}>
             <button

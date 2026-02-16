@@ -76,7 +76,7 @@ a:hover {
   flex-direction: column;
 }
 
-/* Slim top bar */
+/* Top bar */
 .app-header {
   display: flex;
   align-items: center;
@@ -94,6 +94,10 @@ a:hover {
 .app-logo {
   font-size: 1.15rem;
   font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+.app-logo .logo-accent {
   color: var(--color-primary);
 }
 .app-logo:hover {
@@ -594,12 +598,35 @@ a:hover {
   height: 20px;
 }
 
-.star-rating-label {
+.star-rating-wrap--interactive {
+  display: flex;
+  flex-direction: column;
+}
+
+.star-rating-feedback {
   margin-left: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  min-width: 2.5rem;
+}
+
+.star-rating-preview {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-star-active);
+  animation: ratingPop 0.15s ease-out;
+}
+@keyframes ratingPop {
+  from { transform: scale(0.8); opacity: 0.5; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.star-rating-value {
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--color-star-active);
 }
+
 
 /* ============================================================
    Modal — Default (center) + Bottom Sheet on mobile
@@ -624,9 +651,12 @@ a:hover {
   width: 100%;
   max-width: 520px;
   max-height: 90vh;
+  max-height: 90dvh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   position: relative;
   box-shadow: var(--shadow-lg);
+  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
 }
 
 /* Swipe-to-close visual handle */
@@ -664,6 +694,8 @@ a:hover {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .btn-danger {
@@ -674,6 +706,29 @@ a:hover {
 .btn-danger:hover:not(:disabled) {
   background: var(--color-error);
   color: white;
+}
+
+.confirm-delete-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.confirm-delete-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-error);
+  flex-shrink: 0;
+}
+.confirm-delete-btn {
+  flex: 1;
+  min-height: 44px;
+}
+.confirm-cancel-btn {
+  flex: 1;
+  min-height: 44px;
+  background: var(--color-surface-hover);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
 }
 
 .modal-header {
@@ -734,20 +789,61 @@ a:hover {
   align-items: center;
 }
 .tag-chip:hover {
-  border-color: var(--color-accent);
+  border-color: var(--color-primary);
   color: var(--color-text);
 }
 .tag-chip--selected {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
   color: white;
 }
+
+/* Tag colors by media type — selection */
+.tag-grid--movie .tag-chip:hover { border-color: var(--color-primary); }
+.tag-grid--movie .tag-chip--selected { background: var(--color-primary); border-color: var(--color-primary); }
+.tag-grid--tv .tag-chip:hover { border-color: #7c9cbf; }
+.tag-grid--tv .tag-chip--selected { background: #7c9cbf; border-color: #7c9cbf; }
+.tag-grid--youtube .tag-chip:hover { border-color: var(--color-accent); }
+.tag-grid--youtube .tag-chip--selected { background: var(--color-accent); border-color: var(--color-accent); }
 
 .tag-chip--small {
   padding: 0.2rem 0.5rem;
   font-size: 0.75rem;
   cursor: default;
   min-height: auto;
+}
+
+/* Feed tag colors by media type */
+.feed-item-tags--movie .tag-chip--small {
+  background: #f5e6d3;
+  border-color: #e8d0b5;
+  color: #8b5e1a;
+}
+.feed-item-tags--tv .tag-chip--small {
+  background: #d6e2ed;
+  border-color: #b8cce0;
+  color: #3d5e7a;
+}
+.feed-item-tags--youtube .tag-chip--small {
+  background: #d6e8da;
+  border-color: #b8d4bf;
+  color: #3d6b47;
+}
+
+[data-theme="dark"] .feed-item-tags--movie .tag-chip--small {
+  background: #382e1f;
+  border-color: #4a3d2a;
+  color: #d4a86a;
+}
+[data-theme="dark"] .feed-item-tags--tv .tag-chip--small {
+  background: #1f2c38;
+  border-color: #2a3d4d;
+  color: #8fb5d4;
+}
+[data-theme="dark"] .feed-item-tags--youtube .tag-chip--small {
+  background: #1f3325;
+  border-color: #2a4430;
+  color: #8fbf9a;
 }
 
 /* ============================================================
@@ -988,12 +1084,16 @@ a:hover {
 /* Chip filter bar */
 .feed-filters {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+  gap: 0.3rem;
+  margin-bottom: 0.75rem;
   padding-bottom: 4px;
+}
+.feed-filters .filter-chip {
+  flex: 1 1 0;
+  justify-content: center;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .feed-filters::-webkit-scrollbar {
   display: none;
@@ -1001,30 +1101,40 @@ a:hover {
 
 .filter-chip {
   flex: 0 0 auto;
-  padding: 0.5rem 0.85rem;
+  padding: 0.3rem 0.6rem;
   border-radius: var(--radius-full);
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text-muted);
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s;
   font-family: inherit;
   white-space: nowrap;
-  min-height: 36px;
+  min-height: 30px;
   display: inline-flex;
   align-items: center;
   -webkit-tap-highlight-color: transparent;
 }
-.filter-chip:hover {
-  border-color: var(--color-primary);
-  color: var(--color-text);
+@media (hover: hover) {
+  .filter-chip:hover {
+    border-color: var(--color-primary);
+    color: var(--color-text);
+  }
+}
+.filter-chip:focus {
+  outline: none;
 }
 .filter-chip--active {
   background: var(--color-primary);
   border-color: var(--color-primary);
   color: white;
+}
+.filter-chip--sort {
+  border-color: var(--color-text-muted);
+  color: var(--color-text);
+  font-weight: 600;
 }
 
 /* Filter bottom sheet */
@@ -1115,6 +1225,12 @@ a:hover {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  animation: feedFadeIn 0.3s ease;
+}
+
+@keyframes feedFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .feed-item {
@@ -1122,11 +1238,10 @@ a:hover {
   border-radius: var(--radius-lg);
   padding: 1rem;
   box-shadow: var(--shadow);
-  border-left: 3px solid transparent;
+  border-left: 3px solid var(--color-primary);
 }
-.feed-item:nth-child(3n+1) { border-left-color: var(--color-primary); }
-.feed-item:nth-child(3n+2) { border-left-color: var(--color-accent); }
-.feed-item:nth-child(3n) { border-left-color: #7c9cbf; }
+.feed-item--tv { border-left-color: #7c9cbf; }
+.feed-item--youtube { border-left-color: var(--color-accent); }
 
 .feed-item--editable {
   cursor: pointer;
@@ -1142,10 +1257,24 @@ a:hover {
 
 /* Highlight animation when scrolled to from recent activity */
 .feed-item--highlight {
-  animation: highlightPulse 2s ease-out;
+  animation: highlightPulseAmber 2s ease-out;
 }
-@keyframes highlightPulse {
+.feed-item--tv.feed-item--highlight {
+  animation: highlightPulseBlue 2s ease-out;
+}
+.feed-item--youtube.feed-item--highlight {
+  animation: highlightPulseGreen 2s ease-out;
+}
+@keyframes highlightPulseAmber {
   0%, 20% { box-shadow: 0 0 0 3px var(--color-primary), var(--shadow); }
+  100% { box-shadow: var(--shadow); }
+}
+@keyframes highlightPulseBlue {
+  0%, 20% { box-shadow: 0 0 0 3px #7c9cbf, var(--shadow); }
+  100% { box-shadow: var(--shadow); }
+}
+@keyframes highlightPulseGreen {
+  0%, 20% { box-shadow: 0 0 0 3px var(--color-accent), var(--shadow); }
   100% { box-shadow: var(--shadow); }
 }
 
@@ -1264,8 +1393,8 @@ a:hover {
 }
 
 .feed-item-thumbnail {
-  width: 80px;
-  height: 45px;
+  width: 56px;
+  height: 56px;
   object-fit: cover;
   border-radius: 6px;
   background: var(--color-border);

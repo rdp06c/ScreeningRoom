@@ -7,8 +7,12 @@ export default function FeedItem({ review, onEdit, groupAvg }) {
   const displayRating = review.rating ? review.rating / 2 : null
   const content = review.content_items
   const isYouTube = content?.content_type === 'youtube_video'
+  const mediaTypeClass = isYouTube ? 'youtube' : content?.content_type === 'movie' ? 'movie' : 'tv'
   const genres = content?.metadata_json?.genres || []
-  const streaming = content?.streaming_availability || []
+  const rawStreaming = content?.streaming_availability || []
+  const streaming = rawStreaming.filter((s, i, arr) =>
+    arr.findIndex(x => x.platform_name === s.platform_name) === i
+  )
   const isOwn = user?.id === review.user_id
 
   const contentTypeLabel = isYouTube
@@ -26,7 +30,7 @@ export default function FeedItem({ review, onEdit, groupAvg }) {
   return (
     <div
       id={`review-${review.id}`}
-      className={`feed-item ${isOwn ? 'feed-item--editable' : ''}`}
+      className={`feed-item feed-item--${mediaTypeClass} ${isOwn ? 'feed-item--editable' : ''}`}
       onClick={handleClick}
       title={isOwn ? 'Click to edit your review' : undefined}
     >
@@ -87,7 +91,7 @@ export default function FeedItem({ review, onEdit, groupAvg }) {
           )}
 
           {review.tags?.length > 0 && (
-            <div className="feed-item-tags">
+            <div className={`feed-item-tags feed-item-tags--${mediaTypeClass}`}>
               {review.tags.map(t => (
                 <span key={t.id} className="tag-chip tag-chip--small">{t.tag}</span>
               ))}

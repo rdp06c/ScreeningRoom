@@ -277,6 +277,7 @@ A group of 10–30 people logging a few reviews per week will stay well within e
 
 ### Phase 3: Social Layer — UP NEXT
 - User profile pages (rating history, stats, filters)
+- Personal "watched" tracker — mark content as seen/unseen independent of reviewing
 - "Watched but not rated" distinct from "not watched"
 - PWA setup (installable, service worker, manifest)
 
