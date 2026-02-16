@@ -192,6 +192,7 @@ export default function Feed() {
   function updateFilter(key, value) {
     setFilter(prev => ({ ...prev, [key]: value }))
     setExpandedFilter(null)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   function toggleFilterCategory(category) {

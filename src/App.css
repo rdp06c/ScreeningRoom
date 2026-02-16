@@ -3,6 +3,12 @@
    Warm, mobile-first design. Light theme.
    ============================================================ */
 
+body.no-scroll {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
 :root {
   --color-bg: #f5f1ec;
   --color-surface: #ffffff;
@@ -428,13 +434,13 @@ a:hover {
    ============================================================ */
 
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 0.6rem;
 }
 .form-group label {
   display: block;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--color-text-muted);
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.25rem;
   font-weight: 500;
 }
 
@@ -646,8 +652,8 @@ a:hover {
 .modal {
   background: var(--color-surface);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  padding: 1.5rem;
-  padding-top: 1rem;
+  padding: 1rem 1.25rem;
+  padding-top: 0.5rem;
   width: 100%;
   max-width: 520px;
   max-height: 90vh;
@@ -656,7 +662,7 @@ a:hover {
   -webkit-overflow-scrolling: touch;
   position: relative;
   box-shadow: var(--shadow-lg);
-  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
 }
 
 /* Swipe-to-close visual handle */
@@ -667,13 +673,13 @@ a:hover {
   height: 4px;
   background: var(--color-border);
   border-radius: 2px;
-  margin: 0 auto 1rem;
+  margin: 0 auto 0.5rem;
 }
 
 .modal-close {
   position: absolute;
-  top: 0.75rem;
-  right: 1rem;
+  top: 0.25rem;
+  right: 0.75rem;
   background: none;
   border: none;
   color: var(--color-text-muted);
@@ -694,9 +700,21 @@ a:hover {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  margin-top: 0.5rem;
+  margin-top: 0.25rem;
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+
+/* Compact elements inside modal for single-screen fit */
+.modal .star { padding: 4px; }
+.modal .star-svg { width: 32px; height: 32px; }
+.modal .tag-grid { gap: 0.35rem; }
+.modal .tag-chip {
+  padding: 0.3rem 0.65rem;
+  font-size: 0.75rem;
+  min-height: 32px;
+}
+.modal .btn { min-height: 44px; padding: 0.5rem 1.5rem; }
+.modal .form-group textarea { padding: 0.5rem 0.75rem; font-size: 16px; }
 
 .btn-danger {
   background: transparent;
@@ -733,19 +751,21 @@ a:hover {
 
 .modal-header {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
 }
 .modal-poster {
-  width: 80px;
+  width: 60px;
   border-radius: var(--radius);
 }
 .modal-header h2 {
-  font-size: 1.2rem;
+  font-size: 1.05rem;
+  line-height: 1.3;
+  padding-right: 2rem;
 }
 .modal-meta {
   color: var(--color-text-muted);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 
 /* Desktop: center the modal */
@@ -782,15 +802,24 @@ a:hover {
   color: var(--color-text-muted);
   font-size: 0.85rem;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.15s, color 0.15s;
   font-family: inherit;
   min-height: 40px;
   display: inline-flex;
   align-items: center;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
-.tag-chip:hover {
-  border-color: var(--color-primary);
-  color: var(--color-text);
+.tag-chip:focus,
+.tag-chip:active {
+  outline: none;
+  box-shadow: none;
+}
+@media (hover: hover) {
+  .tag-chip:hover { border-color: var(--color-primary); color: var(--color-text); }
+  .tag-grid--movie .tag-chip:hover { border-color: var(--color-primary); }
+  .tag-grid--tv .tag-chip:hover { border-color: #7c9cbf; }
+  .tag-grid--youtube .tag-chip:hover { border-color: var(--color-accent); }
 }
 .tag-chip--selected {
   background: var(--color-primary);
@@ -799,11 +828,8 @@ a:hover {
 }
 
 /* Tag colors by media type — selection */
-.tag-grid--movie .tag-chip:hover { border-color: var(--color-primary); }
 .tag-grid--movie .tag-chip--selected { background: var(--color-primary); border-color: var(--color-primary); }
-.tag-grid--tv .tag-chip:hover { border-color: #7c9cbf; }
 .tag-grid--tv .tag-chip--selected { background: #7c9cbf; border-color: #7c9cbf; }
-.tag-grid--youtube .tag-chip:hover { border-color: var(--color-accent); }
 .tag-grid--youtube .tag-chip--selected { background: var(--color-accent); border-color: var(--color-accent); }
 
 .tag-chip--small {
@@ -1059,6 +1085,7 @@ a:hover {
   color: var(--color-text-muted);
   font-size: 0.85rem;
   text-align: center;
+  pointer-events: none;
 }
 
 /* ============================================================
@@ -1087,13 +1114,12 @@ a:hover {
   gap: 0.3rem;
   margin-bottom: 0.75rem;
   padding-bottom: 4px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .feed-filters .filter-chip {
-  flex: 1 1 0;
+  flex: 0 0 auto;
   justify-content: center;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .feed-filters::-webkit-scrollbar {
   display: none;
@@ -1101,7 +1127,7 @@ a:hover {
 
 .filter-chip {
   flex: 0 0 auto;
-  padding: 0.3rem 0.6rem;
+  padding: 0.3rem 0.75rem;
   border-radius: var(--radius-full);
   border: 1px solid var(--color-border);
   background: var(--color-surface);
@@ -1473,16 +1499,16 @@ a:hover {
    ============================================================ */
 
 .modal-thumbnail {
-  width: 140px;
-  height: 79px;
+  width: 110px;
+  height: 62px;
   object-fit: cover;
   border-radius: var(--radius);
 }
 
 .modal-channel {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--color-accent);
-  margin-top: 0.25rem;
+  margin-top: 0.15rem;
 }
 
 /* ============================================================

@@ -104,6 +104,10 @@ export default function SearchBar({ onSelect }) {
           onKeyDown={handleKeyDown}
           onFocus={() => results.length > 0 && setOpen(true)}
           className="search-input"
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck="false"
         />
         {isYouTubeUrl(query.trim()) && (
           <button

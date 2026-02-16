@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { getMovieDetails, getTvDetails, posterUrl } from '../lib/tmdb'
@@ -28,6 +28,18 @@ export default function ReviewModal({ item, onClose, onSaved, existingReview }) 
 
   const isYouTube = item.mediaType === 'youtube'
   const isEditing = !!existingReview
+
+  // Lock background scrolling while modal is open
+  useEffect(() => {
+    const scrollY = window.scrollY
+    document.body.classList.add('no-scroll')
+    document.body.style.top = `-${scrollY}px`
+    return () => {
+      document.body.classList.remove('no-scroll')
+      document.body.style.top = ''
+      window.scrollTo(0, scrollY)
+    }
+  }, [])
 
   function toggleTag(tag) {
     setSelectedTags(prev =>
@@ -216,7 +228,7 @@ export default function ReviewModal({ item, onClose, onSaved, existingReview }) 
               onChange={e => setShortTake(e.target.value)}
               maxLength={280}
               placeholder="What did you think?"
-              rows={3}
+              rows={2}
             />
           </div>
 
@@ -230,7 +242,7 @@ export default function ReviewModal({ item, onClose, onSaved, existingReview }) 
                   key={tag}
                   type="button"
                   className={`tag-chip ${selectedTags.includes(tag) ? 'tag-chip--selected' : ''}`}
-                  onClick={() => toggleTag(tag)}
+                  onClick={(e) => { toggleTag(tag); e.currentTarget.blur() }}
                 >
                   {tag}
                 </button>

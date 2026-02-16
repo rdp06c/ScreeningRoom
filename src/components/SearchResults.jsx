@@ -7,6 +7,7 @@ export default function SearchResults({ results, onSelect }) {
         <button
           key={`${item.mediaType}-${item.id}`}
           className="search-result-item"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => onSelect(item)}
         >
           <img
