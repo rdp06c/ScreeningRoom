@@ -57,13 +57,15 @@ export default function StarRating({ value, onChange, readonly = false }) {
     if (val !== null) setHoverValue(val)
   }
 
-  function handleTouchEnd() {
+  function handleTouchEnd(e) {
     if (readonly || !touchActiveRef.current) return
     touchActiveRef.current = false
     if (hoverValue) {
-      onChange(hoverValue)
+      onChange(hoverValue === value ? null : hoverValue)
     }
     setHoverValue(0)
+    // Prevent the synthesized click from firing and toggling the rating back
+    e.preventDefault()
   }
 
   return (

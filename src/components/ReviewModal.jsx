@@ -93,6 +93,7 @@ export default function ReviewModal({ item, onClose, onSaved, existingReview }) 
     }
   }, [])
 
+
   function toggleTag(tag) {
     setSelectedTags(prev =>
       prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
@@ -253,63 +254,65 @@ export default function ReviewModal({ item, onClose, onSaved, existingReview }) 
       >
         <button className="modal-close" onClick={onClose}>&times;</button>
 
-        <div className="modal-header">
-          {thumbnailSrc && (
-            <img
-              src={thumbnailSrc}
-              alt={item.title}
-              className={isYouTube ? 'modal-thumbnail' : 'modal-poster'}
-            />
-          )}
-          <div>
-            <h2>{item.title}</h2>
-            <p className="modal-meta">
-              {contentLabel}
-              {item.year ? ` · ${item.year}` : ''}
-              {isYouTube && item.duration ? ` · ${item.duration}` : ''}
-            </p>
-            {isYouTube && item.channelName && (
-              <p className="modal-channel">{item.channelName}</p>
-            )}
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Rating (optional)</label>
-            <StarRating value={rating} onChange={setRating} />
-          </div>
-
-          <div className="form-group">
-            <label>Short Take (optional, {280 - shortTake.length} chars left)</label>
-            <textarea
-              value={shortTake}
-              onChange={e => setShortTake(e.target.value)}
-              maxLength={280}
-              placeholder="What did you think?"
-              rows={2}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>
-              Vibe Tags {isYouTube ? '(at least one required)' : '(optional)'}
-            </label>
-            <div className={`tag-grid tag-grid--${item.mediaType}`}>
-              {VIBE_TAGS.map(tag => (
-                <button
-                  key={tag}
-                  type="button"
-                  className={`tag-chip ${selectedTags.includes(tag) ? 'tag-chip--selected' : ''}`}
-                  onClick={(e) => { toggleTag(tag); e.currentTarget.blur() }}
-                >
-                  {tag}
-                </button>
-              ))}
+        <form onSubmit={handleSubmit} className="modal-form">
+          <div className="modal-body">
+            <div className="modal-header">
+              {thumbnailSrc && (
+                <img
+                  src={thumbnailSrc}
+                  alt={item.title}
+                  className={isYouTube ? 'modal-thumbnail' : 'modal-poster'}
+                />
+              )}
+              <div>
+                <h2>{item.title}</h2>
+                <p className="modal-meta">
+                  {contentLabel}
+                  {item.year ? ` · ${item.year}` : ''}
+                  {isYouTube && item.duration ? ` · ${item.duration}` : ''}
+                </p>
+                {isYouTube && item.channelName && (
+                  <p className="modal-channel">{item.channelName}</p>
+                )}
+              </div>
             </div>
-          </div>
 
-          {error && <p className="form-error">{error}</p>}
+            <div className="form-group">
+              <label>Rating (optional)</label>
+              <StarRating value={rating} onChange={setRating} />
+            </div>
+
+            <div className="form-group">
+              <label>Short Take (optional, {280 - shortTake.length} chars left)</label>
+              <textarea
+                value={shortTake}
+                onChange={e => setShortTake(e.target.value)}
+                maxLength={280}
+                placeholder="What did you think?"
+                rows={3}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>
+                Vibe Tags {isYouTube ? '(at least one required)' : '(optional)'}
+              </label>
+              <div className={`tag-grid tag-grid--${item.mediaType}`}>
+                {VIBE_TAGS.map(tag => (
+                  <button
+                    key={tag}
+                    type="button"
+                    className={`tag-chip ${selectedTags.includes(tag) ? 'tag-chip--selected' : ''}`}
+                    onClick={(e) => { toggleTag(tag); e.currentTarget.blur() }}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {error && <p className="form-error">{error}</p>}
+          </div>
 
           <div className="modal-actions">
             <button type="submit" className="btn btn-primary" disabled={saving || deleting}>

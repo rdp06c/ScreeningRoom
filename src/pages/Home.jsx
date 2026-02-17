@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
@@ -154,12 +155,13 @@ export default function Home() {
         )}
       </div>
 
-      {selectedItem && (
+      {selectedItem && createPortal(
         <ReviewModal
           item={selectedItem}
           onClose={() => setSelectedItem(null)}
           onSaved={handleSaved}
-        />
+        />,
+        document.body
       )}
     </div>
   )
