@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f5f1ec"/>
+      <stop offset="100%" stop-color="#e8e0d6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded square background -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- Movie screen shape -->
+  <rect x="96" y="120" width="320" height="200" rx="16" fill="url(#screen)" opacity="0.95"/>
+
+  <!-- Screen glow -->
+  <rect x="96" y="120" width="320" height="200" rx="16" fill="none" stroke="#fff" stroke-width="3" opacity="0.3"/>
+
+  <!-- Film strip perforations - left side -->
+  <rect x="68" y="136" width="16" height="12" rx="3" fill="#fff" opacity="0.35"/>
+  <rect x="68" y="168" width="16" height="12" rx="3" fill="#fff" opacity="0.35"/>
+  <rect x="68" y="200" width="16" height="12" rx="3" fill="#fff" opacity="0.35"/>
+  <rect x="68" y="232" width="16" height="12" rx="3" fill="#fff" opacity="0.35"/>
+  <rect x="68" y="264" width="16" height="12" rx="3" fill="#fff" opacity="0.35"/>
+  <rect x="68" y="296" width="16" height="12" rx="3" fill="#fff" opacity="0.35"/>
+
+  <!-- Film strip perforations - right side -->
+  <rect x="428" y="136" width="16" height="12" rx="3" fill="#fff" opacity="0.35"/>
+  <rect x="428" y="168" width="16" height="12" rx="3" fill="#fff" opacity="0.35"/>
+  <rect x="428" y="200" width="16" height="12" rx="3" fill="#fff" opacity="0.35"/>
+  <rect x="428" y="232" width="16" height="12" rx="3" fill="#fff" opacity="0.35"/>
+  <rect x="428" y="264" width="16" height="12" rx="3" fill="#fff" opacity="0.35"/>
+  <rect x="428" y="296" width="16" height="12" rx="3" fill="#fff" opacity="0.35"/>
+
+  <!-- Play triangle on screen -->
+  <polygon points="228,180 228,260 296,220" fill="#d97706" opacity="0.6"/>
+
+  <!-- "Screening Room" text below screen -->
+  <text x="256" y="382" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-weight="700" font-size="52" fill="#fff" opacity="0.95">Screening</text>
+  <text x="256" y="430" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-weight="700" font-size="52" fill="#fff" opacity="0.95">Room</text>
+
+  <!-- Subtle star accent -->
+  <circle cx="256" y="430" r="0" fill="none"/>
+</svg>

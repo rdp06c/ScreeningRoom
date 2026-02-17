@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { getMovieDetails, getTvDetails, posterUrl } from '../lib/tmdb'
@@ -28,6 +28,58 @@ export default function ReviewModal({ item, onClose, onSaved, existingReview }) 
 
   const isYouTube = item.mediaType === 'youtube'
   const isEditing = !!existingReview
+
+  // Swipe-to-dismiss
+  const modalRef = useRef(null)
+  const dragStartY = useRef(null)
+  const dragCurrentY = useRef(0)
+
+  const handleTouchStart = useCallback((e) => {
+    const modal = modalRef.current
+    if (!modal) return
+    // Only start drag if modal is scrolled to top
+    if (modal.scrollTop > 0) return
+    dragStartY.current = e.touches[0].clientY
+  }, [])
+
+  const handleTouchMove = useCallback((e) => {
+    if (dragStartY.current === null) return
+    const dy = e.touches[0].clientY - dragStartY.current
+    if (dy < 0) {
+      // Swiping up — reset and let normal scroll take over
+      dragStartY.current = null
+      dragCurrentY.current = 0
+      if (modalRef.current) modalRef.current.style.transform = ''
+      return
+    }
+    dragCurrentY.current = dy
+    if (modalRef.current) {
+      modalRef.current.style.transform = `translateY(${dy}px)`
+      modalRef.current.style.transition = 'none'
+    }
+  }, [])
+
+  const handleTouchEnd = useCallback(() => {
+    if (dragStartY.current === null) return
+    const dy = dragCurrentY.current
+    dragStartY.current = null
+    dragCurrentY.current = 0
+
+    if (dy > 120) {
+      // Dismiss
+      if (modalRef.current) {
+        modalRef.current.style.transition = 'transform 0.2s ease-out'
+        modalRef.current.style.transform = 'translateY(100%)'
+      }
+      setTimeout(() => onClose(), 200)
+    } else {
+      // Snap back
+      if (modalRef.current) {
+        modalRef.current.style.transition = 'transform 0.2s ease-out'
+        modalRef.current.style.transform = ''
+      }
+    }
+  }, [onClose])
 
   // Lock background scrolling while modal is open
   useEffect(() => {
@@ -191,7 +243,14 @@ export default function ReviewModal({ item, onClose, onSaved, existingReview }) 
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
+      <div
+        className="modal"
+        ref={modalRef}
+        onClick={e => e.stopPropagation()}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         <button className="modal-close" onClick={onClose}>&times;</button>
 
         <div className="modal-header">

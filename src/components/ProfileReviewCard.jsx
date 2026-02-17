@@ -1,11 +1,18 @@
 import { posterUrl } from '../lib/tmdb'
 import StarRating from './StarRating'
 
+function isBareWatched(review) {
+  return review.rating === null
+    && !review.short_take
+    && (!review.tags || review.tags.length === 0)
+}
+
 export default function ProfileReviewCard({ review, onClick }) {
   const content = review.content_items
   const isYouTube = content?.content_type === 'youtube_video'
   const mediaTypeClass = isYouTube ? 'youtube' : content?.content_type === 'movie' ? 'movie' : 'tv'
   const displayRating = review.rating ? review.rating / 2 : null
+  const bare = isBareWatched(review)
 
   const contentTypeLabel = isYouTube
     ? 'YouTube'
@@ -17,7 +24,7 @@ export default function ProfileReviewCard({ review, onClick }) {
 
   return (
     <div
-      className={`profile-review-card profile-review-card--${mediaTypeClass}`}
+      className={`profile-review-card profile-review-card--${mediaTypeClass} ${bare ? 'profile-review-card--bare' : ''}`}
       onClick={onClick}
     >
       <img
@@ -38,7 +45,13 @@ export default function ProfileReviewCard({ review, onClick }) {
         {displayRating ? (
           <StarRating value={displayRating} readonly />
         ) : (
-          <span className="feed-item-watched-badge">Watched</span>
+          <span className={`feed-item-watched-badge ${bare ? 'feed-item-watched-badge--bare' : ''}`}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="14" height="14">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            Watched
+          </span>
         )}
 
         {review.short_take && (

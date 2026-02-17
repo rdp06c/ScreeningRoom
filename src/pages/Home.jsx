@@ -78,6 +78,11 @@ export default function Home() {
     navigate('/feed')
   }
 
+  function handleQuickWatched() {
+    fetchRecentActivity()
+    fetchStats()
+  }
+
   function timeAgo(dateStr) {
     const diff = Date.now() - new Date(dateStr).getTime()
     const mins = Math.floor(diff / 60000)
@@ -96,7 +101,7 @@ export default function Home() {
         <section className="home-hero">
           <p className="home-greeting">{getGreeting()}, {firstName}</p>
           <h1>{tagline}</h1>
-          <SearchBar onSelect={setSelectedItem} />
+          <SearchBar onSelect={setSelectedItem} onQuickWatched={handleQuickWatched} />
         </section>
 
         {stats && (

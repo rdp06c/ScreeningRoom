@@ -51,6 +51,7 @@ export default function Layout({ children }) {
     setTheme(prev => prev === 'light' ? 'dark' : 'light')
   }
 
+
   async function handleSignOut() {
     setShowProfileMenu(false)
     await signOut()
@@ -60,6 +61,11 @@ export default function Layout({ children }) {
   function handleSelectItem(item) {
     setSelectedItem(item)
     setShowLogOverlay(false)
+  }
+
+  function handleQuickWatched() {
+    setShowLogOverlay(false)
+    navigate('/feed', { state: { refresh: Date.now() } })
   }
 
   function handleReviewSaved() {
@@ -213,7 +219,7 @@ export default function Layout({ children }) {
             </button>
           </div>
           <div className="log-overlay-search">
-            <SearchBar onSelect={handleSelectItem} />
+            <SearchBar onSelect={handleSelectItem} onQuickWatched={handleQuickWatched} />
           </div>
           <p className="log-overlay-hint">Search movies, TV shows, or paste a YouTube URL</p>
         </div>

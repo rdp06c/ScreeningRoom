@@ -62,6 +62,9 @@ export default function Profile() {
   // Computed stats
   const totalWatched = reviews.length
   const rated = reviews.filter(r => r.rating !== null)
+  const watchedOnly = reviews.filter(r =>
+    r.rating === null && !r.short_take && (!r.tags || r.tags.length === 0)
+  )
   const avgRating = rated.length > 0
     ? (rated.reduce((sum, r) => sum + r.rating, 0) / rated.length / 2).toFixed(1)
     : null
@@ -163,12 +166,17 @@ export default function Profile() {
       <div className="home-stats profile-stats">
         <div className="home-stat">
           <span className="home-stat-number">{totalWatched}</span>
-          <span className="home-stat-label">Watched</span>
+          <span className="home-stat-label">Logged</span>
         </div>
         <div className="home-stat-divider" />
         <div className="home-stat">
           <span className="home-stat-number">{rated.length}</span>
           <span className="home-stat-label">Rated</span>
+        </div>
+        <div className="home-stat-divider" />
+        <div className="home-stat">
+          <span className="home-stat-number">{watchedOnly.length}</span>
+          <span className="home-stat-label">Watched Only</span>
         </div>
         <div className="home-stat-divider" />
         <div className="home-stat">
@@ -189,15 +197,6 @@ export default function Profile() {
           {typeCounts.youtube_video && (
             <span className="profile-type-pill profile-type-pill--youtube">YouTube: {typeCounts.youtube_video}</span>
           )}
-        </div>
-      )}
-
-      {/* Top tags */}
-      {topTags.length > 0 && (
-        <div className="profile-top-tags">
-          {topTags.map(tag => (
-            <span key={tag} className="tag-chip tag-chip--small">{tag}</span>
-          ))}
         </div>
       )}
 

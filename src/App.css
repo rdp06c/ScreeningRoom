@@ -528,28 +528,7 @@ a:hover {
   z-index: 200;
 }
 
-.search-result-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  border: none;
-  background: none;
-  color: var(--color-text);
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  border-bottom: 1px solid var(--color-border);
-  font-family: inherit;
-  min-height: 44px;
-}
-.search-result-item:last-child {
-  border-bottom: none;
-}
-.search-result-item:hover,
-.search-result-item:active {
-  background: var(--color-surface-hover);
-}
+/* search-result-item layout is now at bottom of file (Quick Watch section) */
 
 .search-result-poster {
   width: 40px;
@@ -1372,14 +1351,7 @@ a:hover {
   margin-bottom: 0.5rem;
 }
 
-.feed-item-watched-badge {
-  display: inline-block;
-  background: var(--color-surface-hover);
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-}
+/* feed-item-watched-badge is now at bottom of file (Bare Watched section) */
 
 .feed-item-group-avg {
   display: flex;
@@ -1900,4 +1872,117 @@ a:hover {
 .home-recent-user-link:hover {
   color: var(--color-primary);
   text-decoration: none;
+}
+
+/* ============================================================
+   Quick Watch Button (Search Results)
+   ============================================================ */
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border-bottom: 1px solid var(--color-border);
+  min-height: 44px;
+}
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-main {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.5rem 0.75rem 1rem;
+  border: none;
+  background: none;
+  color: var(--color-text);
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 44px;
+}
+.search-result-main:hover,
+.search-result-main:active {
+  background: var(--color-surface-hover);
+}
+
+.quick-watch-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  border: none;
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-radius: var(--radius);
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+.quick-watch-btn:hover:not(:disabled) {
+  background: var(--color-surface-hover);
+  color: var(--color-primary);
+}
+.quick-watch-btn:active:not(:disabled) {
+  background: var(--color-border);
+}
+.quick-watch-btn--watched {
+  color: var(--color-accent);
+}
+.quick-watch-btn--watched:hover:not(:disabled) {
+  color: var(--color-accent);
+}
+.quick-watch-btn:disabled {
+  cursor: default;
+}
+.quick-watch-btn svg {
+  display: block;
+}
+.quick-watch-spinner {
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+  animation: pulse-fade 1s infinite;
+}
+@keyframes pulse-fade {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* ============================================================
+   Bare "Watched Only" Feed/Profile Card Styles
+   ============================================================ */
+
+.feed-item--bare {
+  opacity: 0.7;
+}
+.feed-item--bare .feed-item-content {
+  padding-bottom: 0.5rem;
+}
+
+.feed-item-watched-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--color-surface-hover);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+.feed-item-watched-badge svg {
+  display: inline-block;
+  vertical-align: middle;
+}
+.feed-item-watched-badge--bare {
+  background: transparent;
+  padding-left: 0;
+}
+
+.profile-review-card--bare {
+  opacity: 0.7;
 }

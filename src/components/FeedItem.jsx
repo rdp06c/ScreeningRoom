@@ -3,6 +3,12 @@ import { posterUrl, providerLogoUrl } from '../lib/tmdb'
 import { useAuth } from '../contexts/AuthContext'
 import StarRating from './StarRating'
 
+function isBareWatched(review) {
+  return review.rating === null
+    && !review.short_take
+    && (!review.tags || review.tags.length === 0)
+}
+
 export default function FeedItem({ review, onEdit, groupAvg }) {
   const { user } = useAuth()
   const displayRating = review.rating ? review.rating / 2 : null
@@ -15,6 +21,7 @@ export default function FeedItem({ review, onEdit, groupAvg }) {
     arr.findIndex(x => x.platform_name === s.platform_name) === i
   )
   const isOwn = user?.id === review.user_id
+  const bare = isBareWatched(review)
 
   const contentTypeLabel = isYouTube
     ? 'YouTube'
@@ -31,7 +38,7 @@ export default function FeedItem({ review, onEdit, groupAvg }) {
   return (
     <div
       id={`review-${review.id}`}
-      className={`feed-item feed-item--${mediaTypeClass} ${isOwn ? 'feed-item--editable' : ''}`}
+      className={`feed-item feed-item--${mediaTypeClass} ${isOwn ? 'feed-item--editable' : ''} ${bare ? 'feed-item--bare' : ''}`}
       onClick={handleClick}
       title={isOwn ? 'Click to edit your review' : undefined}
     >
@@ -76,7 +83,13 @@ export default function FeedItem({ review, onEdit, groupAvg }) {
             <StarRating value={displayRating} readonly />
           )}
           {!displayRating && review.rating === null && (
-            <span className="feed-item-watched-badge">Watched</span>
+            <span className={`feed-item-watched-badge ${bare ? 'feed-item-watched-badge--bare' : ''}`}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="14" height="14">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              {bare ? 'Watched' : 'Watched'}
+            </span>
           )}
           {groupAvg && (
             <div className="feed-item-group-avg">
@@ -89,7 +102,7 @@ export default function FeedItem({ review, onEdit, groupAvg }) {
             <p className="feed-item-take">{review.short_take}</p>
           )}
 
-          {genres.length > 0 && (
+          {!bare && genres.length > 0 && (
             <div className="feed-item-genres">
               {genres.map(g => (
                 <span key={g} className="genre-chip">{g}</span>
@@ -105,7 +118,7 @@ export default function FeedItem({ review, onEdit, groupAvg }) {
             </div>
           )}
 
-          {streaming.length > 0 && (
+          {!bare && streaming.length > 0 && (
             <div className="streaming-badges">
               {streaming.map(s => (
                 <img

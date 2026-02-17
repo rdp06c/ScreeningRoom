@@ -1,15 +1,44 @@
 import { useState, useEffect, useRef } from 'react'
 import { searchMulti } from '../lib/tmdb'
 import { isYouTubeUrl, extractVideoId, getVideoDetails } from '../lib/youtube'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../contexts/AuthContext'
 import SearchResults from './SearchResults'
 
-export default function SearchBar({ onSelect }) {
+export default function SearchBar({ onSelect, onQuickWatched }) {
+  const { user } = useAuth()
   const [query, setQuery] = useState('')
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
+  const [watchedMap, setWatchedMap] = useState({})
   const debounceRef = useRef(null)
   const containerRef = useRef(null)
+
+  // Fetch user's existing reviews to build watched map
+  useEffect(() => {
+    if (!user) return
+    async function fetchWatched() {
+      const { data } = await supabase
+        .from('reviews')
+        .select('content_items ( content_type, external_id )')
+        .eq('user_id', user.id)
+
+      if (data) {
+        const map = {}
+        data.forEach(r => {
+          if (r.content_items) {
+            const type = r.content_items.content_type === 'movie' ? 'movie'
+              : r.content_items.content_type === 'tv_show' ? 'tv'
+              : 'youtube'
+            map[`${type}-${r.content_items.external_id}`] = true
+          }
+        })
+        setWatchedMap(map)
+      }
+    }
+    fetchWatched()
+  }, [user])
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
@@ -93,6 +122,11 @@ export default function SearchBar({ onSelect }) {
     onSelect(item)
   }
 
+  function handleMarkedWatched(key) {
+    setWatchedMap(prev => ({ ...prev, [key]: true }))
+    onQuickWatched?.()
+  }
+
   return (
     <div className="search-bar" ref={containerRef}>
       <div className="search-input-wrapper">
@@ -122,7 +156,12 @@ export default function SearchBar({ onSelect }) {
       </div>
       {loading && !isYouTubeUrl(query.trim()) && <span className="search-spinner">Searching...</span>}
       {open && results.length > 0 && (
-        <SearchResults results={results} onSelect={handleSelect} />
+        <SearchResults
+          results={results}
+          onSelect={handleSelect}
+          watchedMap={watchedMap}
+          onMarkedWatched={handleMarkedWatched}
+        />
       )}
     </div>
   )

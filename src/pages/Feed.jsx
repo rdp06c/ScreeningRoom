@@ -50,18 +50,41 @@ export default function Feed() {
   const [expandedFilter, setExpandedFilter] = useState(null)
   const [groupAverages, setGroupAverages] = useState({})
   const [sortOrder, setSortOrder] = useState('newest')
+  const [hideWatched, setHideWatched] = useState(() => localStorage.getItem('sr-hide-watched') === 'true')
+  const [userWatchedIds, setUserWatchedIds] = useState(new Set())
 
   useEffect(() => {
     fetchMembers()
+    fetchUserWatched()
+  }, [])
+
+  // Listen for hide-watched changes from the profile menu toggle
+  useEffect(() => {
+    function handleStorage(e) {
+      if (e.key === 'sr-hide-watched') {
+        setHideWatched(e.newValue === 'true')
+      }
+    }
+    window.addEventListener('storage', handleStorage)
+    // Also listen for custom event (same-tab changes)
+    function handleCustom() {
+      setHideWatched(localStorage.getItem('sr-hide-watched') === 'true')
+    }
+    window.addEventListener('sr-hide-watched-changed', handleCustom)
+    return () => {
+      window.removeEventListener('storage', handleStorage)
+      window.removeEventListener('sr-hide-watched-changed', handleCustom)
+    }
   }, [])
 
   useEffect(() => {
     fetchReviews()
-  }, [filter, sortOrder])
+  }, [filter, sortOrder, hideWatched])
 
   // Re-fetch when navigated here with a refresh signal (e.g. after saving a review)
   useEffect(() => {
     if (location.state?.refresh) {
+      fetchUserWatched()
       fetchReviews()
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
@@ -80,6 +103,17 @@ export default function Feed() {
       }
     }
   }, [loading, highlightReviewId])
+
+  async function fetchUserWatched() {
+    const { data } = await supabase
+      .from('reviews')
+      .select('content_item_id')
+      .eq('user_id', user.id)
+
+    if (data) {
+      setUserWatchedIds(new Set(data.map(r => r.content_item_id)))
+    }
+  }
 
   async function fetchMembers() {
     const { data: membership } = await supabase
@@ -158,6 +192,16 @@ export default function Feed() {
         )
       }
 
+      // Always hide bare "watched only" entries (no rating, no take, no tags)
+      filtered = filtered.filter(r =>
+        r.rating !== null || r.short_take || (r.tags && r.tags.length > 0)
+      )
+
+      // Hide content the current user has already watched
+      if (hideWatched && userWatchedIds.size > 0) {
+        filtered = filtered.filter(r => !userWatchedIds.has(r.content_item_id))
+      }
+
       // Collect unique genres for the filter dropdown
       const genreSet = new Set()
       data.forEach(r => {
@@ -210,7 +254,7 @@ export default function Feed() {
       case 'genre':
         return filter.genre === 'all' ? 'Genre' : filter.genre
       case 'tag':
-        return filter.tag === 'all' ? 'Tag' : filter.tag
+        return filter.tag === 'all' ? 'Vibe' : filter.tag
       case 'minRating':
         return filter.minRating === 'all' ? 'Rating' : `${filter.minRating}+`
       default:
@@ -316,6 +360,18 @@ export default function Feed() {
             {isFilterActive(key) && ' \u00d7'}
           </button>
         ))}
+        <button
+          className={`filter-chip ${hideWatched ? 'filter-chip--active' : ''}`}
+          onClick={(e) => {
+            e.currentTarget.blur()
+            const next = !hideWatched
+            setHideWatched(next)
+            localStorage.setItem('sr-hide-watched', String(next))
+            window.dispatchEvent(new Event('sr-hide-watched-changed'))
+          }}
+        >
+          Hide Watched
+        </button>
       </div>
       </div>
 

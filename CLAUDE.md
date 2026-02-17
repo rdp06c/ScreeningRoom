@@ -275,13 +275,20 @@ A group of 10–30 people logging a few reviews per week will stay well within e
 - Home page: greeting, search, stats row, 5 recent activity cards, subtle gradient bg
 - Header/bottom nav with subtle shadows for depth
 
-### Phase 3: Social Layer — UP NEXT
-- User profile pages (rating history, stats, filters)
-- Personal "watched" tracker — mark content as seen/unseen independent of reviewing
-- "Watched but not rated" distinct from "not watched"
-- PWA setup (installable, service worker, manifest)
+### Phase 3: Social Layer — COMPLETE
+- [x] User profile pages (rating history, stats, filters)
+- [x] Tappable usernames in feed and home → navigate to profile
+- [x] View Profile in header dropdown menu
+- [x] Profile review cards with compact layout, sort (newest/oldest/top/low rated), content type filters
+- [x] Quick "Mark Watched" eye icon on search results (bypasses ReviewModal for movies/TV)
+- [x] "Watched but not rated" visual distinction — bare watched entries hidden from feed, dimmed on profile
+- [x] Profile stats: Logged / Rated / Watched Only / Avg Rating
+- [x] Feed filter: "Hide Watched" toggle hides content user has already seen
+- [x] Swipe-to-dismiss on ReviewModal (bottom sheet)
+- [x] App logo (public/logo.svg)
 
 ### Phase 4: Refinement & v2 Features (Ongoing)
+- PWA setup (installable, service worker, manifest, wire up logo)
 - Want to Watch list
 - Taste comparison between users
 - Spoiler tags, emoji reactions
