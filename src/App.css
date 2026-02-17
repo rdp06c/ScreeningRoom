@@ -892,7 +892,7 @@ a:hover {
 .home-content {
   width: 100%;
   max-width: var(--max-width);
-  padding: 0 1.5rem;
+  padding: 0.5rem 1.5rem 0;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -901,7 +901,7 @@ a:hover {
 
 .home-hero {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 .home-greeting {
   font-size: 0.9rem;
@@ -912,7 +912,7 @@ a:hover {
 .home-hero h1 {
   font-size: 1.7rem;
   font-weight: 700;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
   line-height: 1.2;
   background: linear-gradient(135deg, var(--color-primary), #f5c563);
   -webkit-background-clip: text;
@@ -926,8 +926,8 @@ a:hover {
   align-items: center;
   justify-content: center;
   gap: 0;
-  margin-bottom: 1.5rem;
-  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
   background: var(--color-surface);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -1161,6 +1161,9 @@ a:hover {
   border-color: var(--color-text-muted);
   color: var(--color-text);
   font-weight: 600;
+  min-width: 5.5rem;
+  text-align: center;
+  justify-content: center;
 }
 
 /* Filter bottom sheet */
@@ -1687,4 +1690,214 @@ a:hover {
 
 [data-theme="dark"] .modal-overlay {
   background: rgba(0, 0, 0, 0.6);
+}
+
+/* ============================================================
+   Profile Page
+   ============================================================ */
+
+.profile-page {
+  max-width: var(--max-width);
+}
+
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 0 1rem;
+}
+
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+.profile-avatar--emoji {
+  background: var(--color-surface-hover);
+  font-size: 2.5rem;
+}
+
+.profile-name {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.15rem;
+}
+
+.profile-since {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.profile-stats {
+  margin-bottom: 1rem;
+}
+
+/* Content type breakdown pills */
+.profile-type-pills {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.profile-type-pill {
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.profile-type-pill--movie {
+  background: #f5e6d3;
+  color: #8b5e1a;
+}
+.profile-type-pill--tv {
+  background: #d6e2ed;
+  color: #3d5e7a;
+}
+.profile-type-pill--youtube {
+  background: #d6e8da;
+  color: #3d6b47;
+}
+
+[data-theme="dark"] .profile-type-pill--movie {
+  background: #382e1f;
+  color: #d4a86a;
+}
+[data-theme="dark"] .profile-type-pill--tv {
+  background: #1f2c38;
+  color: #8fb5d4;
+}
+[data-theme="dark"] .profile-type-pill--youtube {
+  background: #1f3325;
+  color: #8fbf9a;
+}
+
+/* Top tags row */
+.profile-top-tags {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+/* Profile filters */
+.profile-filters {
+  margin-bottom: 0.75rem;
+}
+.profile-filters .feed-filters {
+  margin-bottom: 0;
+}
+.profile-sort-chip {
+  min-width: 6.5rem;
+}
+
+/* Profile review card */
+.profile-review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.profile-review-card {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  border-left: 3px solid var(--color-primary);
+}
+.profile-review-card--tv { border-left-color: #7c9cbf; }
+.profile-review-card--youtube { border-left-color: var(--color-accent); }
+
+.profile-review-card:active {
+  background: var(--color-surface-hover);
+}
+
+.profile-review-poster {
+  width: 48px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+
+.profile-review-thumbnail {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+
+.profile-review-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-review-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-review-meta {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.profile-review-take {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin-top: 0.25rem;
+  line-height: 1.4;
+}
+
+.profile-review-date {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  white-space: nowrap;
+  align-self: flex-start;
+  margin-top: 0.15rem;
+}
+
+/* Feed item username link */
+.feed-item-username--link {
+  color: var(--color-text);
+  text-decoration: none;
+}
+.feed-item-username--link:hover {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+/* Home recent user link */
+.home-recent-user-link {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-weight: 600;
+}
+.home-recent-user-link:hover {
+  color: var(--color-primary);
+  text-decoration: none;
 }

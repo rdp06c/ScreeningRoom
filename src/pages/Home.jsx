@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import SearchBar from '../components/SearchBar'
@@ -42,7 +42,7 @@ export default function Home() {
     const { data } = await supabase
       .from('reviews')
       .select(`
-        id, rating, created_at,
+        id, rating, created_at, user_id,
         users ( display_name ),
         content_items ( title, content_type )
       `)
@@ -130,7 +130,13 @@ export default function Home() {
                   <div className="home-recent-info">
                     <span className="home-recent-content">{r.content_items?.title}</span>
                     <span className="home-recent-sub">
-                      {r.users?.display_name}
+                      <Link
+                        to={`/profile/${r.user_id}`}
+                        className="home-recent-user-link"
+                        onClick={e => e.stopPropagation()}
+                      >
+                        {r.users?.display_name}
+                      </Link>
                       {r.rating && <span className="home-recent-stars">{' \u2605 '}{(r.rating / 2).toFixed(1)}</span>}
                       {' \u00B7 '}{timeAgo(r.created_at)}
                     </span>

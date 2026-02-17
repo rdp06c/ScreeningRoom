@@ -6,6 +6,7 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Home from './pages/Home'
 import Feed from './pages/Feed'
+import Profile from './pages/Profile'
 
 export default function App() {
   const { user, loading } = useAuth()
@@ -31,6 +32,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <Layout><Feed /></Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile/:userId"
+        element={
+          <ProtectedRoute>
+            <Layout><Profile /></Layout>
           </ProtectedRoute>
         }
       />

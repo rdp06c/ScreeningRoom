@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { posterUrl, providerLogoUrl } from '../lib/tmdb'
 import { useAuth } from '../contexts/AuthContext'
 import StarRating from './StarRating'
@@ -42,7 +43,13 @@ export default function FeedItem({ review, onEdit, groupAvg }) {
             {review.users?.avatar_url || (review.users?.display_name || '?')[0].toUpperCase()}
           </div>
         )}
-        <span className="feed-item-username">{review.users?.display_name || 'Unknown'}</span>
+        <Link
+          to={`/profile/${review.user_id}`}
+          className="feed-item-username feed-item-username--link"
+          onClick={e => e.stopPropagation()}
+        >
+          {review.users?.display_name || 'Unknown'}
+        </Link>
         <span className="feed-item-action">watched</span>
         <time className="feed-item-date">
           {new Date(review.created_at).toLocaleDateString()}
