@@ -413,8 +413,13 @@ export default function Feed() {
             onEdit={handleEditReview}
             groupAvg={groupAverages[review.content_item_id]}
             isWatchedByUser={userWatchedIds.has(review.content_item_id)}
-            onMarkedWatched={(contentItemId) => {
-              setUserWatchedIds(prev => new Set([...prev, contentItemId]))
+            onMarkedWatched={(contentItemId, watched) => {
+              setUserWatchedIds(prev => {
+                const next = new Set(prev)
+                if (watched) next.add(contentItemId)
+                else next.delete(contentItemId)
+                return next
+              })
             }}
           />
         ))}

@@ -36,30 +36,43 @@ export default function FeedItem({ review, onEdit, groupAvg, isWatchedByUser, on
 
   async function handleMarkWatched(e) {
     e.stopPropagation()
-    if (marking || isWatchedByUser || isOwn) return
+    if (marking || isOwn) return
     setMarking(true)
     try {
-      const { data: membership } = await supabase
-        .from('group_memberships')
-        .select('group_id')
-        .eq('user_id', user.id)
-        .limit(1)
-        .single()
+      if (isWatchedByUser) {
+        // Undo: delete the user's bare review for this content
+        await supabase
+          .from('reviews')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('content_item_id', review.content_item_id)
+          .is('rating', null)
+          .is('short_take', null)
 
-      if (!membership) throw new Error('Not in a group')
+        onMarkedWatched?.(review.content_item_id, false)
+      } else {
+        const { data: membership } = await supabase
+          .from('group_memberships')
+          .select('group_id')
+          .eq('user_id', user.id)
+          .limit(1)
+          .single()
 
-      await supabase
-        .from('reviews')
-        .upsert({
-          user_id: user.id,
-          content_item_id: review.content_item_id,
-          group_id: membership.group_id,
-          rating: null,
-          short_take: null,
-          watched_date: new Date().toISOString().split('T')[0],
-        }, { onConflict: 'user_id,content_item_id,group_id' })
+        if (!membership) throw new Error('Not in a group')
 
-      onMarkedWatched?.(review.content_item_id)
+        await supabase
+          .from('reviews')
+          .upsert({
+            user_id: user.id,
+            content_item_id: review.content_item_id,
+            group_id: membership.group_id,
+            rating: null,
+            short_take: null,
+            watched_date: new Date().toISOString().split('T')[0],
+          }, { onConflict: 'user_id,content_item_id,group_id' })
+
+        onMarkedWatched?.(review.content_item_id, true)
+      }
     } catch (err) {
       console.error('Mark watched failed:', err)
     } finally {
@@ -180,7 +193,7 @@ export default function FeedItem({ review, onEdit, groupAvg, isWatchedByUser, on
         <button
           className={`feed-item-mark-watched ${isWatchedByUser ? 'feed-item-mark-watched--done' : ''}`}
           onClick={handleMarkWatched}
-          disabled={isWatchedByUser || marking}
+          disabled={marking}
         >
           {marking ? (
             <span className="feed-item-mark-watched-spinner">...</span>
