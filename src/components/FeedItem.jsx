@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { posterUrl, providerLogoUrl } from '../lib/tmdb'
+import { posterUrl, providerLogoUrl, getMovieDetails, getTvDetails } from '../lib/tmdb'
+import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import StarRating from './StarRating'
 
@@ -9,7 +11,7 @@ function isBareWatched(review) {
     && (!review.tags || review.tags.length === 0)
 }
 
-export default function FeedItem({ review, onEdit, groupAvg }) {
+export default function FeedItem({ review, onEdit, groupAvg, isWatchedByUser, onMarkedWatched }) {
   const { user } = useAuth()
   const displayRating = review.rating ? review.rating / 2 : null
   const content = review.content_items
@@ -22,6 +24,7 @@ export default function FeedItem({ review, onEdit, groupAvg }) {
   )
   const isOwn = user?.id === review.user_id
   const bare = isBareWatched(review)
+  const [marking, setMarking] = useState(false)
 
   const contentTypeLabel = isYouTube
     ? 'YouTube'
@@ -30,6 +33,39 @@ export default function FeedItem({ review, onEdit, groupAvg }) {
   const imgSrc = isYouTube
     ? content?.poster_thumbnail_url
     : posterUrl(content?.poster_thumbnail_url, 'w92')
+
+  async function handleMarkWatched(e) {
+    e.stopPropagation()
+    if (marking || isWatchedByUser || isOwn) return
+    setMarking(true)
+    try {
+      const { data: membership } = await supabase
+        .from('group_memberships')
+        .select('group_id')
+        .eq('user_id', user.id)
+        .limit(1)
+        .single()
+
+      if (!membership) throw new Error('Not in a group')
+
+      await supabase
+        .from('reviews')
+        .upsert({
+          user_id: user.id,
+          content_item_id: review.content_item_id,
+          group_id: membership.group_id,
+          rating: null,
+          short_take: null,
+          watched_date: new Date().toISOString().split('T')[0],
+        }, { onConflict: 'user_id,content_item_id,group_id' })
+
+      onMarkedWatched?.(review.content_item_id)
+    } catch (err) {
+      console.error('Mark watched failed:', err)
+    } finally {
+      setMarking(false)
+    }
+  }
 
   function handleClick() {
     if (isOwn && onEdit) onEdit(review)
@@ -43,13 +79,19 @@ export default function FeedItem({ review, onEdit, groupAvg }) {
       title={isOwn ? 'Click to edit your review' : undefined}
     >
       <div className="feed-item-user">
-        {review.users?.avatar_url && review.users.avatar_url.startsWith('http') ? (
-          <img src={review.users.avatar_url} alt="" className="feed-item-avatar" />
-        ) : (
-          <div className={`feed-item-avatar feed-item-avatar--placeholder ${review.users?.avatar_url ? 'feed-item-avatar--emoji' : ''}`}>
-            {review.users?.avatar_url || (review.users?.display_name || '?')[0].toUpperCase()}
-          </div>
-        )}
+        <Link
+          to={`/profile/${review.user_id}`}
+          className="feed-item-avatar-link"
+          onClick={e => e.stopPropagation()}
+        >
+          {review.users?.avatar_url && review.users.avatar_url.startsWith('http') ? (
+            <img src={review.users.avatar_url} alt="" className="feed-item-avatar" />
+          ) : (
+            <div className={`feed-item-avatar feed-item-avatar--placeholder ${review.users?.avatar_url ? 'feed-item-avatar--emoji' : ''}`}>
+              {review.users?.avatar_url || (review.users?.display_name || '?')[0].toUpperCase()}
+            </div>
+          )}
+        </Link>
         <Link
           to={`/profile/${review.user_id}`}
           className="feed-item-username feed-item-username--link"
@@ -133,6 +175,33 @@ export default function FeedItem({ review, onEdit, groupAvg }) {
           )}
         </div>
       </div>
+
+      {!isOwn && (
+        <button
+          className={`feed-item-mark-watched ${isWatchedByUser ? 'feed-item-mark-watched--done' : ''}`}
+          onClick={handleMarkWatched}
+          disabled={isWatchedByUser || marking}
+        >
+          {marking ? (
+            <span className="feed-item-mark-watched-spinner">...</span>
+          ) : isWatchedByUser ? (
+            <>
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+              </svg>
+              Watched
+            </>
+          ) : (
+            <>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              Mark Watched
+            </>
+          )}
+        </button>
+      )}
     </div>
   )
 }

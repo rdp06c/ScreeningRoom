@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import FeedItem from '../components/FeedItem'
 import ReviewModal from '../components/ReviewModal'
+import PullToRefresh from '../components/PullToRefresh'
 
 const VIBE_TAGS = [
   'Feel-Good', 'Mind-Bending', 'Slow Burn', 'Binge-Worthy',
@@ -339,8 +340,13 @@ export default function Feed() {
     return filter[key]
   }
 
+  async function refreshAll() {
+    await Promise.all([fetchReviews(), fetchUserWatched(), fetchMembers()])
+  }
+
   return (
     <div className="feed-page">
+      <PullToRefresh onRefresh={refreshAll}>
       {/* Sticky filter chip bar */}
       <div className="feed-filters-sticky">
       <div className="feed-filters">
@@ -409,7 +415,16 @@ export default function Feed() {
 
       <div className="feed-list" key={JSON.stringify(filter)}>
         {reviews.map(review => (
-          <FeedItem key={review.id} review={review} onEdit={handleEditReview} groupAvg={groupAverages[review.content_item_id]} />
+          <FeedItem
+            key={review.id}
+            review={review}
+            onEdit={handleEditReview}
+            groupAvg={groupAverages[review.content_item_id]}
+            isWatchedByUser={userWatchedIds.has(review.content_item_id)}
+            onMarkedWatched={(contentItemId) => {
+              setUserWatchedIds(prev => new Set([...prev, contentItemId]))
+            }}
+          />
         ))}
       </div>
 
@@ -421,6 +436,8 @@ export default function Feed() {
         />
         <span>This product uses the TMDB API but is not endorsed or certified by TMDB.</span>
       </div>
+
+      </PullToRefresh>
 
       {selectedItem && (
         <ReviewModal

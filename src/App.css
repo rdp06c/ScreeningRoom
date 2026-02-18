@@ -1565,6 +1565,11 @@ a:hover {
   background: var(--color-surface-hover);
   font-size: 1.3rem;
 }
+.feed-item-avatar-link {
+  text-decoration: none;
+  display: flex;
+  flex-shrink: 0;
+}
 
 /* ============================================================
    Profile Modal
@@ -1996,6 +2001,62 @@ a:hover {
   padding-left: 0;
 }
 
+/* Mark as Watched button on feed cards */
+.feed-item-mark-watched {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 8px 14px;
+  border: 1.5px solid var(--color-primary);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-primary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  width: fit-content;
+}
+.feed-item-mark-watched:active {
+  background: var(--color-primary);
+  color: white;
+}
+.feed-item-mark-watched--done {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  cursor: default;
+  opacity: 0.7;
+}
+.feed-item-mark-watched:disabled {
+  cursor: default;
+}
+.feed-item-mark-watched svg {
+  flex-shrink: 0;
+}
+
 .profile-review-card--bare {
   opacity: 0.7;
+}
+
+/* ---- Pull to Refresh ---- */
+.pull-indicator {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.pull-indicator-spinner {
+  padding-bottom: 8px;
+}
+
+.pull-indicator-spinner--active svg {
+  animation: ptr-spin 0.8s linear infinite;
+}
+
+@keyframes ptr-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }

@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import SearchBar from '../components/SearchBar'
 import ReviewModal from '../components/ReviewModal'
+import PullToRefresh from '../components/PullToRefresh'
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -96,8 +97,13 @@ export default function Home() {
 
   const firstName = profile?.display_name?.split(' ')[0] || 'there'
 
+  async function refreshAll() {
+    await Promise.all([fetchStats(), fetchRecentActivity()])
+  }
+
   return (
     <div className="home-page">
+      <PullToRefresh onRefresh={refreshAll}>
       <div className="home-content">
         <section className="home-hero">
           <p className="home-greeting">{getGreeting()}, {firstName}</p>
@@ -154,6 +160,7 @@ export default function Home() {
           </section>
         )}
       </div>
+      </PullToRefresh>
 
       {selectedItem && createPortal(
         <ReviewModal

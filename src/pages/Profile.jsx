@@ -175,11 +175,6 @@ export default function Profile() {
         </div>
         <div className="home-stat-divider" />
         <div className="home-stat">
-          <span className="home-stat-number">{watchedOnly.length}</span>
-          <span className="home-stat-label">Watched Only</span>
-        </div>
-        <div className="home-stat-divider" />
-        <div className="home-stat">
           <span className="home-stat-number">{avgRating ? `${avgRating}\u2605` : '\u2014'}</span>
           <span className="home-stat-label">Avg Rating</span>
         </div>
