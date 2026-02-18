@@ -5,7 +5,6 @@ import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import SearchBar from '../components/SearchBar'
 import ReviewModal from '../components/ReviewModal'
-import PullToRefresh from '../components/PullToRefresh'
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -44,14 +43,21 @@ export default function Home() {
     const { data } = await supabase
       .from('reviews')
       .select(`
-        id, rating, created_at, user_id,
+        id, rating, short_take, created_at, user_id,
         users ( display_name ),
-        content_items ( title, content_type )
+        content_items ( title, content_type ),
+        tags ( id )
       `)
       .order('created_at', { ascending: false })
-      .limit(5)
+      .limit(20)
 
-    if (data) setRecentActivity(data)
+    if (data) {
+      // Filter out bare "watched only" entries (no rating, no take, no tags)
+      const meaningful = data.filter(r =>
+        r.rating !== null || r.short_take || (r.tags && r.tags.length > 0)
+      ).slice(0, 5)
+      setRecentActivity(meaningful)
+    }
   }
 
   async function fetchStats() {
@@ -65,8 +71,9 @@ export default function Home() {
       .eq('user_id', user.id)
 
     const { count: totalMembers } = await supabase
-      .from('group_memberships')
+      .from('users')
       .select('*', { count: 'exact', head: true })
+      .eq('is_approved', true)
 
     setStats({
       totalReviews: totalReviews || 0,
@@ -81,7 +88,6 @@ export default function Home() {
   }
 
   function handleQuickWatched() {
-    fetchRecentActivity()
     fetchStats()
   }
 
@@ -97,13 +103,8 @@ export default function Home() {
 
   const firstName = profile?.display_name?.split(' ')[0] || 'there'
 
-  async function refreshAll() {
-    await Promise.all([fetchStats(), fetchRecentActivity()])
-  }
-
   return (
     <div className="home-page">
-      <PullToRefresh onRefresh={refreshAll}>
       <div className="home-content">
         <section className="home-hero">
           <p className="home-greeting">{getGreeting()}, {firstName}</p>
@@ -160,7 +161,6 @@ export default function Home() {
           </section>
         )}
       </div>
-      </PullToRefresh>
 
       {selectedItem && createPortal(
         <ReviewModal

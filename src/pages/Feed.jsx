@@ -117,24 +117,16 @@ export default function Feed() {
   }
 
   async function fetchMembers() {
-    const { data: membership } = await supabase
-      .from('group_memberships')
-      .select('group_id')
-      .eq('user_id', user.id)
-      .limit(1)
-      .single()
-
-    if (!membership) return
-
     const { data } = await supabase
-      .from('group_memberships')
-      .select('user_id, users ( display_name )')
-      .eq('group_id', membership.group_id)
+      .from('users')
+      .select('id, display_name')
+      .eq('is_approved', true)
+      .order('display_name')
 
     if (data) {
-      setMembers(data.map(m => ({
-        id: m.user_id,
-        name: m.users?.display_name || 'Unknown',
+      setMembers(data.map(u => ({
+        id: u.id,
+        name: u.display_name || 'Unknown',
       })))
     }
   }
