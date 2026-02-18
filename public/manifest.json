@@ -1,0 +1,29 @@
+{
+  "name": "Screening Room",
+  "short_name": "Screening Room",
+  "description": "Log what you've watched, rate it, see what friends think",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#d97706",
+  "background_color": "#f5f1ec",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
