@@ -67,28 +67,44 @@ a:hover {
 }
 
 /* ============================================================
-   Lock to portrait-style layout in landscape on mobile
+   Landscape blocker overlay — mobile only
    ============================================================ */
 
+.landscape-blocker {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: var(--color-bg);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-align: center;
+  padding: 2rem;
+}
+.landscape-blocker-icon {
+  font-size: 3rem;
+  animation: rotate-hint 2s ease-in-out infinite;
+}
+@keyframes rotate-hint {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-90deg); }
+  50%, 75% { transform: rotate(-90deg); }
+}
+.landscape-blocker-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.landscape-blocker-sub {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
 @media (orientation: landscape) and (max-height: 500px) {
-  .app-header,
-  .bottom-tabs {
-    max-width: var(--max-width);
-    left: 50%;
-    transform: translateX(-50%);
-    right: auto;
-    width: 100%;
-  }
-  .home-page {
-    max-width: var(--max-width);
-    left: 50%;
-    transform: translateX(-50%);
-    right: auto;
-    width: 100%;
-  }
-  .log-overlay {
-    max-width: var(--max-width);
-    margin: 0 auto;
+  .landscape-blocker {
+    display: flex;
   }
 }
 

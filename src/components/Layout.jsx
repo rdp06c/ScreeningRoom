@@ -83,6 +83,12 @@ export default function Layout({ children }) {
 
   return (
     <div className="app-layout">
+      <div className="landscape-blocker">
+        <div className="landscape-blocker-icon">📱</div>
+        <div className="landscape-blocker-text">Please rotate your device</div>
+        <div className="landscape-blocker-sub">Screening Room works best in portrait mode</div>
+      </div>
+
       <header className="app-header">
         <Link to="/" className="app-logo">Screening <span className="logo-accent">Room</span></Link>
         {user && (
