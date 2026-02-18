@@ -69,7 +69,7 @@ export default function Profile() {
     ? (rated.reduce((sum, r) => sum + r.rating, 0) / rated.length / 2).toFixed(1)
     : null
 
-  const typeCounts = reviews.reduce((acc, r) => {
+  const typeCounts = meaningful.reduce((acc, r) => {
     const type = r.content_items?.content_type
     if (type) acc[type] = (acc[type] || 0) + 1
     return acc
