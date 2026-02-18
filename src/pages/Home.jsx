@@ -64,11 +64,13 @@ export default function Home() {
     const { count: totalReviews } = await supabase
       .from('reviews')
       .select('*', { count: 'exact', head: true })
+      .or('rating.not.is.null,short_take.neq.')
 
     const { count: myReviews } = await supabase
       .from('reviews')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
+      .or('rating.not.is.null,short_take.neq.')
 
     const { count: totalMembers } = await supabase
       .from('users')

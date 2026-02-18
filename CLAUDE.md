@@ -277,18 +277,24 @@ A group of 10–30 people logging a few reviews per week will stay well within e
 
 ### Phase 3: Social Layer — COMPLETE
 - [x] User profile pages (rating history, stats, filters)
-- [x] Tappable usernames in feed and home → navigate to profile
+- [x] Tappable usernames and avatars in feed and home → navigate to profile
 - [x] View Profile in header dropdown menu
 - [x] Profile review cards with compact layout, sort (newest/oldest/top/low rated), content type filters
 - [x] Quick "Mark Watched" eye icon on search results (bypasses ReviewModal for movies/TV)
-- [x] "Watched but not rated" visual distinction — bare watched entries hidden from feed, dimmed on profile
-- [x] Profile stats: Logged / Rated / Watched Only / Avg Rating
+- [x] "Watched but not rated" visual distinction — bare watched entries hidden from feed and profiles
+- [x] Profile stats: Logged / Rated / Avg Rating
 - [x] Feed filter: "Hide Watched" toggle hides content user has already seen
 - [x] Swipe-to-dismiss on ReviewModal (bottom sheet)
 - [x] App logo (public/logo.svg)
 
 ### Phase 4: Refinement & v2 Features (Ongoing)
-- PWA setup (installable, service worker, manifest, wire up logo)
+- [x] PWA setup (installable, service worker, manifest, wire up logo)
+- [x] Pull-to-refresh on Feed page for PWA (no browser refresh button)
+- [x] "Mark Watched" toggle button on feed cards (tap to mark/unmark, sage green fill when active)
+- [x] Fixed header (position: fixed) — prevents header bounce on iOS PWA overscroll
+- [x] Overscroll bounce disabled globally for PWA standalone mode
+- [x] Recent activity on Home excludes bare watched-only entries
+- [x] Members count and person filter query approved users directly (fixes RLS visibility)
 - Want to Watch list
 - Taste comparison between users
 - Spoiler tags, emoji reactions
