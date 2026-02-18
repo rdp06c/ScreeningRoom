@@ -67,6 +67,32 @@ a:hover {
 }
 
 /* ============================================================
+   Lock to portrait-style layout in landscape on mobile
+   ============================================================ */
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .app-header,
+  .bottom-tabs {
+    max-width: var(--max-width);
+    left: 50%;
+    transform: translateX(-50%);
+    right: auto;
+    width: 100%;
+  }
+  .home-page {
+    max-width: var(--max-width);
+    left: 50%;
+    transform: translateX(-50%);
+    right: auto;
+    width: 100%;
+  }
+  .log-overlay {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+}
+
+/* ============================================================
    Loading
    ============================================================ */
 

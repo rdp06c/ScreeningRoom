@@ -5,6 +5,9 @@ import { AuthProvider } from './contexts/AuthContext'
 import App from './App'
 import './App.css'
 
+// Lock to portrait when running as installed PWA
+screen.orientation?.lock?.('portrait').catch(() => {})
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
