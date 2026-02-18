@@ -2033,10 +2033,9 @@ a:hover {
   color: white;
 }
 .feed-item-mark-watched--done {
+  background: var(--color-accent);
   border-color: var(--color-accent);
-  color: var(--color-accent);
-  cursor: default;
-  opacity: 0.7;
+  color: white;
 }
 .feed-item-mark-watched:disabled {
   cursor: default;

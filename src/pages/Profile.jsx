@@ -59,12 +59,12 @@ export default function Profile() {
     setLoading(false)
   }
 
-  // Computed stats
-  const totalWatched = reviews.length
-  const rated = reviews.filter(r => r.rating !== null)
-  const watchedOnly = reviews.filter(r =>
-    r.rating === null && !r.short_take && (!r.tags || r.tags.length === 0)
+  // Computed stats — exclude bare watched-only entries
+  const meaningful = reviews.filter(r =>
+    r.rating !== null || r.short_take || (r.tags && r.tags.length > 0)
   )
+  const totalWatched = meaningful.length
+  const rated = reviews.filter(r => r.rating !== null)
   const avgRating = rated.length > 0
     ? (rated.reduce((sum, r) => sum + r.rating, 0) / rated.length / 2).toFixed(1)
     : null
@@ -87,8 +87,10 @@ export default function Profile() {
     .slice(0, 5)
     .map(([tag]) => tag)
 
-  // Filter and sort
-  let filtered = [...reviews]
+  // Filter and sort — hide bare watched-only entries
+  let filtered = reviews.filter(r =>
+    r.rating !== null || r.short_take || (r.tags && r.tags.length > 0)
+  )
   if (contentType !== 'all') {
     filtered = filtered.filter(r => r.content_items?.content_type === contentType)
   }
