@@ -132,6 +132,9 @@ export default function FeedItem({ review, onEdit, groupAvg, isWatchedByUser, on
             {isYouTube && content?.metadata_json?.channelName
               ? ` · ${content.metadata_json.channelName}`
               : ''}
+            {isYouTube && content?.metadata_json?.duration
+              ? ` · ${content.metadata_json.duration}`
+              : ''}
           </span>
 
           {displayRating && (

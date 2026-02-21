@@ -40,6 +40,9 @@ export default function ProfileReviewCard({ review, onClick }) {
           {isYouTube && content?.metadata_json?.channelName
             ? ` \u00B7 ${content.metadata_json.channelName}`
             : ''}
+          {isYouTube && content?.metadata_json?.duration
+            ? ` \u00B7 ${content.metadata_json.duration}`
+            : ''}
         </span>
 
         {displayRating ? (
